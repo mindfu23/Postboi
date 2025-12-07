@@ -134,7 +134,7 @@ Complete cross-platform mobile application for simultaneous sharing of images an
   - Kivy 2.2.1
   - KivyMD 1.1.1
   - Plyer 2.1.0
-  - Pillow 10.1.0
+  - Pillow 10.3.0 (security patched)
   - Requests 2.31.0
   - APScheduler 3.10.4
 

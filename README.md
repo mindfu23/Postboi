@@ -27,7 +27,7 @@ Cross-platform mobile app (iOS & Android) for sharing images and text to Instagr
 - **Kivy 2.2.1+** - Cross-platform UI framework
 - **KivyMD 1.1.1+** - Material Design components
 - **Plyer 2.1.0+** - Cross-platform APIs (file picker, camera, etc.)
-- **Pillow 10.1.0+** - Image processing
+- **Pillow 10.3.0+** - Image processing (security patched)
 - **APScheduler 3.10.4+** - Job scheduling
 - **Buildozer 1.5.0+** - Android app builder
 - **kivy-ios 1.3.0+** - iOS app builder
