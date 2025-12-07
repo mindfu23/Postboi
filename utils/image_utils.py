@@ -124,15 +124,11 @@ class ImageUtils:
             Corrected PIL Image object
         """
         try:
-            # Get EXIF data
-            exif = img._getexif()
+            # Get EXIF data using the public API
+            exif = img.getexif()
             if exif is not None:
-                # Find orientation tag
-                for orientation_tag in ExifTags.TAGS.keys():
-                    if ExifTags.TAGS[orientation_tag] == 'Orientation':
-                        break
-
-                orientation = exif.get(orientation_tag)
+                # Get orientation tag
+                orientation = exif.get(0x0112)  # 0x0112 is the Orientation tag
 
                 # Rotate based on orientation
                 if orientation == 3:

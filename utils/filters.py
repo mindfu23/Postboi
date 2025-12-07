@@ -64,7 +64,7 @@ class ImageFilters:
     @staticmethod
     def sepia(img: Image.Image, intensity: float = 1.0) -> Image.Image:
         """
-        Apply sepia tone effect.
+        Apply sepia tone effect using efficient matrix operations.
 
         Args:
             img: PIL Image object
@@ -73,24 +73,32 @@ class ImageFilters:
         Returns:
             Filtered PIL Image object
         """
-        # Convert to grayscale first
-        grayscale_img = img.convert('L')
+        # Convert image to RGB if needed
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
 
-        # Create sepia tone
-        sepia_img = Image.new('RGB', img.size)
-        pixels = sepia_img.load()
-        gray_pixels = grayscale_img.load()
+        # Get image data
+        width, height = img.size
+        pixels = img.load()
 
-        for y in range(img.size[1]):
-            for x in range(img.size[0]):
-                gray = gray_pixels[x, y]
-                # Apply sepia transformation
-                r = min(255, int(gray + 2 * intensity * 40))
-                g = min(255, int(gray + intensity * 20))
-                b = max(0, int(gray - intensity * 20))
-                pixels[x, y] = (r, g, b)
+        # Apply sepia transformation more efficiently
+        for y in range(height):
+            for x in range(width):
+                r, g, b = pixels[x, y]
 
-        return sepia_img
+                # Calculate sepia values
+                tr = int(0.393 * r + 0.769 * g + 0.189 * b)
+                tg = int(0.349 * r + 0.686 * g + 0.168 * b)
+                tb = int(0.272 * r + 0.534 * g + 0.131 * b)
+
+                # Apply intensity and clamp values
+                tr = min(255, int(tr * intensity + r * (1 - intensity)))
+                tg = min(255, int(tg * intensity + g * (1 - intensity)))
+                tb = min(255, int(tb * intensity + b * (1 - intensity)))
+
+                pixels[x, y] = (tr, tg, tb)
+
+        return img
 
     @staticmethod
     def vintage(img: Image.Image) -> Image.Image:
