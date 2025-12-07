@@ -1,0 +1,253 @@
+# Postboi UI Layout File
+# Material Design interface for cross-platform social sharing
+
+#:import MDRaisedButton kivymd.uix.button.MDRaisedButton
+#:import MDTextField kivymd.uix.textfield.MDTextField
+#:import MDCheckbox kivymd.uix.selectioncontrol.MDCheckbox
+#:import MDSpinner kivymd.uix.spinner.MDSpinner
+#:import MDCard kivymd.uix.card.MDCard
+#:import MDLabel kivymd.uix.label.MDLabel
+#:import MDIconButton kivymd.uix.button.MDIconButton
+#:import MDChip kivymd.uix.chip.MDChip
+#:import os os
+
+<PostboiApp>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(16)
+        spacing: dp(16)
+
+        # Header
+        MDLabel:
+            text: "Postboi"
+            font_style: "H4"
+            halign: "center"
+            size_hint_y: None
+            height: dp(60)
+
+        # Scrollable content
+        ScrollView:
+            do_scroll_x: False
+
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: dp(16)
+                size_hint_y: None
+                height: self.minimum_height
+                padding: [0, 0, 0, dp(16)]
+
+                # Image Selection Card
+                MDCard:
+                    orientation: 'vertical'
+                    padding: dp(16)
+                    spacing: dp(12)
+                    size_hint_y: None
+                    height: dp(200)
+                    elevation: 2
+
+                    MDLabel:
+                        text: "Select Image"
+                        font_style: "H6"
+                        size_hint_y: None
+                        height: dp(30)
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(12)
+                        size_hint_y: None
+                        height: dp(50)
+
+                        MDRaisedButton:
+                            text: "Choose Image"
+                            on_release: app.on_select_image()
+                            size_hint_x: 0.6
+
+                        MDLabel:
+                            text: "No image selected" if not app.selected_image else os.path.basename(app.selected_image)
+                            size_hint_x: 0.4
+                            font_size: sp(12)
+
+                    # Image preview placeholder
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(80)
+
+                        AsyncImage:
+                            source: app.selected_image if app.selected_image else ''
+                            size_hint: (None, None)
+                            size: (dp(80), dp(80))
+                            pos_hint: {'center_x': 0.5}
+                            allow_stretch: True
+                            keep_ratio: True
+
+                # Filter Selection Card
+                MDCard:
+                    orientation: 'vertical'
+                    padding: dp(16)
+                    spacing: dp(12)
+                    size_hint_y: None
+                    height: dp(140)
+                    elevation: 2
+
+                    MDLabel:
+                        text: "Image Filter"
+                        font_style: "H6"
+                        size_hint_y: None
+                        height: dp(30)
+
+                    MDLabel:
+                        text: "Selected: " + app.selected_filter
+                        size_hint_y: None
+                        height: dp(25)
+                        font_size: sp(14)
+
+                    ScrollView:
+                        size_hint_y: None
+                        height: dp(50)
+                        do_scroll_y: False
+
+                        BoxLayout:
+                            orientation: 'horizontal'
+                            spacing: dp(8)
+                            size_hint_x: None
+                            width: self.minimum_width
+                            padding: [dp(4), 0]
+
+                            MDChip:
+                                text: "None"
+                                on_release: app.on_filter_select('none')
+
+                            MDChip:
+                                text: "Grayscale"
+                                on_release: app.on_filter_select('grayscale')
+
+                            MDChip:
+                                text: "Sepia"
+                                on_release: app.on_filter_select('sepia')
+
+                            MDChip:
+                                text: "Vintage"
+                                on_release: app.on_filter_select('vintage')
+
+                            MDChip:
+                                text: "Bright"
+                                on_release: app.on_filter_select('bright')
+
+                            MDChip:
+                                text: "Sharpen"
+                                on_release: app.on_filter_select('sharpen')
+
+                # Caption Card
+                MDCard:
+                    orientation: 'vertical'
+                    padding: dp(16)
+                    spacing: dp(12)
+                    size_hint_y: None
+                    height: dp(220)
+                    elevation: 2
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint_y: None
+                        height: dp(30)
+
+                        MDLabel:
+                            text: "Caption"
+                            font_style: "H6"
+                            size_hint_x: 0.7
+
+                        MDRaisedButton:
+                            text: "Templates"
+                            size_hint_x: 0.3
+                            on_release: app.on_template_select('Simple')
+
+                    MDTextField:
+                        id: caption_field
+                        hint_text: "Enter your caption here..."
+                        text: app.caption_text
+                        on_text: app.caption_text = self.text
+                        multiline: True
+                        size_hint_y: None
+                        height: dp(150)
+                        mode: "rectangle"
+
+                # Platform Selection Card
+                MDCard:
+                    orientation: 'vertical'
+                    padding: dp(16)
+                    spacing: dp(12)
+                    size_hint_y: None
+                    height: dp(200)
+                    elevation: 2
+
+                    MDLabel:
+                        text: "Select Platforms"
+                        font_style: "H6"
+                        size_hint_y: None
+                        height: dp(30)
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(8)
+                        size_hint_y: None
+                        height: dp(40)
+
+                        MDCheckbox:
+                            id: wordpress_checkbox
+                            size_hint: None, None
+                            size: dp(48), dp(48)
+                            on_active: app.on_platform_toggle('wordpress', self.active)
+
+                        MDLabel:
+                            text: "WordPress"
+                            size_hint_x: 0.8
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(8)
+                        size_hint_y: None
+                        height: dp(40)
+
+                        MDCheckbox:
+                            id: facebook_checkbox
+                            size_hint: None, None
+                            size: dp(48), dp(48)
+                            on_active: app.on_platform_toggle('facebook', self.active)
+
+                        MDLabel:
+                            text: "Facebook"
+                            size_hint_x: 0.8
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        spacing: dp(8)
+                        size_hint_y: None
+                        height: dp(40)
+
+                        MDCheckbox:
+                            id: instagram_checkbox
+                            size_hint: None, None
+                            size: dp(48), dp(48)
+                            on_active: app.on_platform_toggle('instagram', self.active)
+
+                        MDLabel:
+                            text: "Instagram"
+                            size_hint_x: 0.8
+
+                # Share Button
+                MDRaisedButton:
+                    text: "Share to Selected Platforms" if not app.is_loading else "Sharing..."
+                    pos_hint: {'center_x': 0.5}
+                    size_hint: (0.8, None)
+                    height: dp(50)
+                    md_bg_color: app.theme_cls.primary_color
+                    on_release: app.on_share_button()
+                    disabled: app.is_loading
+
+        # Loading Indicator
+        MDSpinner:
+            size_hint: None, None
+            size: dp(46), dp(46)
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            active: app.is_loading
+            opacity: 1 if app.is_loading else 0
