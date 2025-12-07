@@ -5,7 +5,6 @@ Provides various image filters and effects.
 
 from typing import Optional
 from PIL import Image, ImageEnhance, ImageFilter
-import numpy as np
 
 
 class ImageFilters:
