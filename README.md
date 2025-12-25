@@ -26,6 +26,7 @@ Cross-platform mobile app (iOS & Android) for sharing images and text to Instagr
 - ⏰ **Scheduled Posting** - Schedule posts for optimal engagement times
 - 🔄 **Concurrent Uploads** - Fast simultaneous posting using ThreadPoolExecutor
 - 🔒 **Secure Configuration** - Environment variable support via .env files
+- 📰 **Good News Network Template** - NEW! Responsive web template for displaying articles in grid layout
 
 ## 🛠️ Tech Stack
 
@@ -555,6 +556,53 @@ This project is open source and available under the [MIT License](LICENSE).
 - [Plyer](https://plyer.readthedocs.io/) - Platform-independent API access
 - [Pillow](https://pillow.readthedocs.io/) - Image processing library
 
+## 📰 Good News Network Template
+
+A modern, responsive front-end template for displaying articles in an engaging grid layout. Perfect for news websites, blog aggregators, or content curation platforms.
+
+### Features
+
+- 📱 **Fully Responsive** - Adapts seamlessly from desktop to mobile
+- 🎨 **Modern Design** - Clean, professional aesthetics with hover effects
+- 🖼️ **Image-Centric Cards** - Prominent images with overlay captions
+- ⚡ **Performance Optimized** - Lazy loading, efficient rendering
+- ♿ **Accessible** - WCAG compliant with keyboard navigation support
+- 🔧 **Easy Integration** - Ready for dynamic content from APIs
+
+### Quick Start
+
+```bash
+# Navigate to the template directory
+cd gnn_template
+
+# Open in browser (or use a local server)
+python -m http.server 8000
+```
+
+Visit `http://localhost:8000` to see the template in action.
+
+### Integration
+
+The template supports multiple integration methods:
+
+1. **Static HTML** - Replace placeholder articles directly in HTML
+2. **JavaScript API** - Use provided methods to load articles dynamically
+3. **Server-Side Rendering** - Generate HTML from your backend (Flask, Django, etc.)
+4. **WordPress REST API** - Built-in example for WordPress integration
+
+See the [GNN Template Documentation](gnn_template/README.md) for detailed integration guides.
+
+### Screenshots
+
+**Desktop View:**
+![Desktop](https://github.com/user-attachments/assets/5986976a-bb27-47d4-bc0a-01a94347986c)
+
+**Tablet View:**
+![Tablet](https://github.com/user-attachments/assets/1146f87e-28a0-4aeb-9325-c62a93896a96)
+
+**Mobile View:**
+![Mobile](https://github.com/user-attachments/assets/061d4211-2b79-49ef-ad52-bc02ec8b2924)
+
 ## 📧 Support
 
 For issues, questions, or suggestions:
@@ -567,6 +615,7 @@ For issues, questions, or suggestions:
 - [Architecture](ARCHITECTURE.md) - System architecture and design
 - [Contributing](CONTRIBUTING.md) - How to contribute to the project
 - [Verification](VERIFICATION.md) - Testing and verification procedures
+- [GNN Template](gnn_template/README.md) - Good News Network front-end template documentation
 
 ## 🗺️ Roadmap
 

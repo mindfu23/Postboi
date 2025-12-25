@@ -133,10 +133,22 @@ class GoodNewsApp {
         // Clear existing content if needed
         // this.articlesGrid.innerHTML = '';
         
+        // Use DocumentFragment for better performance
+        const fragment = document.createDocumentFragment();
+        
         articles.forEach(article => {
             const articleCard = this.createArticleCard(article);
-            this.articlesGrid.appendChild(articleCard);
+            fragment.appendChild(articleCard);
         });
+        
+        // Append all cards at once
+        this.articlesGrid.appendChild(fragment);
+        
+        // Set up lazy loading and animations for newly added cards
+        this.setupLazyLoadingForNew();
+        if (CONFIG.enableAnimations) {
+            this.setupScrollAnimationsForNew();
+        }
     }
     
     /**
@@ -196,9 +208,24 @@ class GoodNewsApp {
             rootMargin: `${CONFIG.lazyLoadThreshold}px`
         });
         
+        // Store observer for reuse with dynamic content
+        this.imageObserver = imageObserver;
+        
         // Observe all lazy images
         document.querySelectorAll('.lazy-image').forEach(img => {
             imageObserver.observe(img);
+        });
+    }
+    
+    /**
+     * Set up lazy loading for newly added images
+     */
+    setupLazyLoadingForNew() {
+        if (!this.imageObserver) return;
+        
+        // Observe newly added lazy images that aren't already being observed
+        document.querySelectorAll('.lazy-image').forEach(img => {
+            this.imageObserver.observe(img);
         });
     }
     
@@ -263,12 +290,33 @@ class GoodNewsApp {
             threshold: 0.1
         });
         
+        // Store observer for reuse with dynamic content
+        this.animationObserver = animationObserver;
+        
         // Set initial state and observe cards
         document.querySelectorAll('.article-card').forEach(card => {
             card.style.opacity = '0';
             card.style.transform = 'translateY(20px)';
             card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
             animationObserver.observe(card);
+        });
+    }
+    
+    /**
+     * Set up scroll animations for newly added article cards
+     */
+    setupScrollAnimationsForNew() {
+        if (!this.animationObserver) return;
+        
+        // Apply animations to newly added cards
+        document.querySelectorAll('.article-card').forEach(card => {
+            // Only apply to cards that don't already have the transition
+            if (!card.style.transition) {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                this.animationObserver.observe(card);
+            }
         });
     }
     
