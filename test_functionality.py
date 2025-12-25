@@ -63,11 +63,13 @@ except Exception as e:
 # Test 4: Image Utils
 print("\n4. Testing Image Utilities...")
 try:
+    import tempfile
     image_utils = ImageUtils()
     print(f"   ✓ ImageUtils initialized")
     
-    # Test validation (with a non-existent file)
-    is_valid, msg = image_utils.validate_image('/tmp/nonexistent.jpg')
+    # Test validation (with a non-existent file using portable path)
+    nonexistent_path = os.path.join(tempfile.gettempdir(), 'nonexistent.jpg')
+    is_valid, msg = image_utils.validate_image(nonexistent_path)
     if not is_valid:
         print(f"   ✓ Image validation works (correctly detected missing file)")
     
@@ -166,11 +168,13 @@ except Exception as e:
 # Test 9: Image Adjustment Function (Mock Test)
 print("\n9. Testing Image Adjustment Function...")
 try:
+    import tempfile
     from config import adjust_image_for_platform
     
     # We can't test with a real image without creating one,
     # but we can verify the function exists and handles missing files
-    result = adjust_image_for_platform('/tmp/nonexistent.jpg', 'instagram')
+    nonexistent_path = os.path.join(tempfile.gettempdir(), 'nonexistent.jpg')
+    result = adjust_image_for_platform(nonexistent_path, 'instagram')
     print("   ✓ Image adjustment function is available")
     
 except Exception as e:

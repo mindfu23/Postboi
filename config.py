@@ -162,7 +162,11 @@ def adjust_image_for_platform(image_path: str, platform: str) -> Optional[str]:
     Returns:
         Path to adjusted image, or None if failed
     """
-    from utils.image_utils import ImageUtils
+    try:
+        from utils.image_utils import ImageUtils
+    except ImportError as e:
+        print(f"Warning: Could not import ImageUtils: {e}")
+        return image_path
     
     requirements = PLATFORM_REQUIREMENTS.get(platform.lower(), {})
     max_size = requirements.get('max_image_size')
@@ -171,14 +175,17 @@ def adjust_image_for_platform(image_path: str, platform: str) -> Optional[str]:
         return image_path  # No adjustment needed
     
     # Resize image to meet platform requirements
-    adjusted_path = ImageUtils.resize_image(
-        image_path,
-        max_width=max_size[0],
-        max_height=max_size[1],
-        quality=90
-    )
-    
-    return adjusted_path if adjusted_path else image_path
+    try:
+        adjusted_path = ImageUtils.resize_image(
+            image_path,
+            max_width=max_size[0],
+            max_height=max_size[1],
+            quality=90
+        )
+        return adjusted_path if adjusted_path else image_path
+    except Exception as e:
+        print(f"Warning: Failed to adjust image: {e}")
+        return image_path
 
 
 def unified_post_workflow(
@@ -208,10 +215,20 @@ def unified_post_workflow(
     """
     import time
     import logging
-    from services.share_manager import ShareManager
-    from services.wordpress import WordPressService
-    from services.facebook_share import FacebookService
-    from services.instagram_share import InstagramService
+    
+    # Import services (imports inside function to avoid circular dependencies)
+    try:
+        from services.share_manager import ShareManager
+        from services.wordpress import WordPressService
+        from services.facebook_share import FacebookService
+        from services.instagram_share import InstagramService
+    except ImportError as e:
+        # Graceful fallback if services cannot be imported
+        error_msg = f"Failed to import required services: {e}"
+        return {
+            platform: (False, error_msg, [error_msg]) 
+            for platform in platforms
+        }
     
     # Setup logging
     if UNIFIED_WORKFLOW_CONFIG['enable_logging']:
