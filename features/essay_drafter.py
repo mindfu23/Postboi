@@ -13,8 +13,12 @@ from anthropic import Anthropic
 class EssayDrafter:
     """Manages essay drafting from screenshots using OCR and AI."""
 
+    # Class constants
+    MIN_TEXT_LENGTH = 10  # Minimum characters to consider OCR successful
+
     def __init__(self, api_key: str, model: str = 'claude-3-5-sonnet-20241022',
-                 authorial_styles_dir: str = 'authorial_styles'):
+                 authorial_styles_dir: str = 'authorial_styles',
+                 min_text_length: int = MIN_TEXT_LENGTH):
         """
         Initialize EssayDrafter.
 
@@ -22,10 +26,12 @@ class EssayDrafter:
             api_key: Anthropic API key
             model: Claude model to use
             authorial_styles_dir: Directory containing authorial voice files
+            min_text_length: Minimum text length for successful OCR (default: 10)
         """
         self.api_key = api_key
         self.model = model
         self.authorial_styles_dir = authorial_styles_dir
+        self.min_text_length = min_text_length
         self.client = Anthropic(api_key=api_key) if api_key and api_key != 'your_anthropic_api_key' else None
 
     def get_authorial_voice_files(self) -> List[str]:
@@ -109,7 +115,7 @@ class EssayDrafter:
             image = Image.open(image_path)
             text = pytesseract.image_to_string(image)
 
-            if not text or len(text.strip()) < 10:
+            if not text or len(text.strip()) < self.min_text_length:
                 return False, "No text could be extracted from the image. Please ensure the image contains readable text."
 
             return True, text.strip()
