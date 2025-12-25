@@ -10,11 +10,14 @@ import Foundation
 /// Configuration structure for Postboi app
 struct PostboiConfig {
     
+    // MARK: - Private cached environment
+    private static let environment = ProcessInfo.processInfo.environment
+    
     // MARK: - WordPress Configuration
     struct WordPress {
-        static let siteUrl = ProcessInfo.processInfo.environment["WORDPRESS_SITE_URL"] ?? "https://yoursite.wordpress.com"
-        static let username = ProcessInfo.processInfo.environment["WORDPRESS_USERNAME"] ?? "your_username"
-        static let appPassword = ProcessInfo.processInfo.environment["WORDPRESS_APP_PASSWORD"] ?? ""
+        static let siteUrl = environment["WORDPRESS_SITE_URL"] ?? "https://yoursite.wordpress.com"
+        static let username = environment["WORDPRESS_USERNAME"] ?? "your_username"
+        static let appPassword = environment["WORDPRESS_APP_PASSWORD"] ?? ""
         
         static var isConfigured: Bool {
             return siteUrl != "https://yoursite.wordpress.com" && !appPassword.isEmpty
@@ -23,10 +26,10 @@ struct PostboiConfig {
     
     // MARK: - Facebook Configuration
     struct Facebook {
-        static let appId = ProcessInfo.processInfo.environment["FACEBOOK_APP_ID"] ?? "your_app_id"
-        static let appSecret = ProcessInfo.processInfo.environment["FACEBOOK_APP_SECRET"] ?? ""
-        static let accessToken = ProcessInfo.processInfo.environment["FACEBOOK_ACCESS_TOKEN"] ?? ""
-        static let pageId = ProcessInfo.processInfo.environment["FACEBOOK_PAGE_ID"] ?? "your_page_id"
+        static let appId = environment["FACEBOOK_APP_ID"] ?? "your_app_id"
+        static let appSecret = environment["FACEBOOK_APP_SECRET"] ?? ""
+        static let accessToken = environment["FACEBOOK_ACCESS_TOKEN"] ?? ""
+        static let pageId = environment["FACEBOOK_PAGE_ID"] ?? "your_page_id"
         
         static var isConfigured: Bool {
             return appId != "your_app_id" && !accessToken.isEmpty && pageId != "your_page_id"
@@ -35,8 +38,8 @@ struct PostboiConfig {
     
     // MARK: - Instagram Configuration
     struct Instagram {
-        static let businessAccountId = ProcessInfo.processInfo.environment["INSTAGRAM_BUSINESS_ACCOUNT_ID"] ?? "your_business_account_id"
-        static let accessToken = ProcessInfo.processInfo.environment["INSTAGRAM_ACCESS_TOKEN"] ?? ""
+        static let businessAccountId = environment["INSTAGRAM_BUSINESS_ACCOUNT_ID"] ?? "your_business_account_id"
+        static let accessToken = environment["INSTAGRAM_ACCESS_TOKEN"] ?? ""
         
         static var isConfigured: Bool {
             return businessAccountId != "your_business_account_id" && !accessToken.isEmpty
@@ -45,8 +48,8 @@ struct PostboiConfig {
     
     // MARK: - Application Settings
     struct AppSettings {
-        static let maxImageSizeMb = Int(ProcessInfo.processInfo.environment["MAX_IMAGE_SIZE_MB"] ?? "10") ?? 10
-        static let concurrentUploads = Int(ProcessInfo.processInfo.environment["CONCURRENT_UPLOADS"] ?? "3") ?? 3
+        static let maxImageSizeMb = Int(environment["MAX_IMAGE_SIZE_MB"] ?? "10") ?? 10
+        static let concurrentUploads = Int(environment["CONCURRENT_UPLOADS"] ?? "3") ?? 3
         static let supportedFormats = ["jpg", "jpeg", "png", "heic"]
         static let maxCaptionLength = 2200
     }

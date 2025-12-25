@@ -46,6 +46,10 @@
     <div class="container">
         <h1>📱 Postboi Web - Starter Template</h1>
         
+        <div class="note">
+            <strong>⚠️ SECURITY WARNING:</strong> The code examples below are for DEMONSTRATION PURPOSES ONLY. Never expose sensitive API keys, secrets, or access tokens in client-side JavaScript. All API calls with credentials must be handled by a secure backend server. Client-side code can be inspected by anyone visiting your website.
+        </div>
+
         <div class="section">
             <h2>Getting Started</h2>
             <p>This is a starter template for the Postboi web application. Follow the steps below to set up your environment.</p>
@@ -77,10 +81,12 @@ CONCURRENT_UPLOADS=3</pre>
 
         <div class="section">
             <h2>2. Initialize Application</h2>
-            <p>Add the following JavaScript to load environment variables:</p>
+            <p>Add the following JavaScript to your <strong>backend server</strong> (Node.js example):</p>
             <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">
+// SERVER-SIDE CODE (Node.js with Express)
 // Load environment variables (requires dotenv for Node.js backend)
-// For client-side, use environment variables during build time
+require('dotenv').config();
+
 const config = {
     wordpress: {
         siteUrl: process.env.WORDPRESS_SITE_URL,
@@ -103,9 +109,9 @@ const config = {
     }
 };
 
-// Initialize API clients
+// Initialize API clients on server
 async function initializeApp() {
-    console.log('Initializing Postboi Web App...');
+    console.log('Initializing Postboi Web App on server...');
     
     // Validate configuration
     if (!config.facebook.pageId || config.facebook.pageId === 'your_page_id') {
@@ -120,15 +126,24 @@ async function initializeApp() {
         console.warn('WordPress credentials not configured');
     }
     
-    console.log('App initialized successfully');
+    console.log('Server initialized successfully');
 }
 
-// Call initialization on page load
-window.addEventListener('DOMContentLoaded', initializeApp);</pre>
+// CLIENT-SIDE CODE (minimal, no secrets)
+// In your HTML/JavaScript, only send requests to your backend
+async function postToSocialMedia(imageData, caption, platforms) {
+    // Send to YOUR backend API, not directly to social media APIs
+    const response = await fetch('/api/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData, caption, platforms })
+    });
+    return response.json();
+}</pre>
         </div>
 
         <div class="note">
-            <strong>⚠️ Security Note:</strong> Never expose sensitive API keys in client-side code. Use a backend service to handle API calls securely. This template is for demonstration purposes only.
+            <strong>🔒 Important:</strong> The client-side JavaScript should NEVER contain API secrets, tokens, or passwords. Always proxy API requests through your backend server where credentials are stored securely in environment variables.
         </div>
 
         <div class="section">

@@ -20,7 +20,7 @@ WORDPRESS_CONFIG: Dict[str, str] = {
     'site_url': os.getenv('WORDPRESS_SITE_URL', 'https://yoursite.wordpress.com'),
     'username': os.getenv('WORDPRESS_USERNAME', 'your_username'),
     'app_password': os.getenv('WORDPRESS_APP_PASSWORD', 'xxxx xxxx xxxx xxxx xxxx xxxx'),
-    'rss_feed_url': os.getenv('WORDPRESS_SITE_URL', 'https://yoursite.wordpress.com') + '/feed/' if os.getenv('WORDPRESS_SITE_URL') else 'https://yoursite.wordpress.com/feed/',
+    'rss_feed_url': (os.getenv('WORDPRESS_SITE_URL', 'https://yoursite.wordpress.com').rstrip('/') + '/feed/'),
 }
 
 # Facebook Configuration
