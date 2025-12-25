@@ -4,21 +4,10 @@ Loads sensitive credentials from environment variables.
 Create a .env file based on .env.template and populate with your credentials.
 """
 
-import os
-from typing import Dict, List
-from typing import Dict, List, Tuple, Optional, Any
-from dotenv import load_dotenv
+from typing import Any, Dict, List
 
-# Load environment variables from .env file if it exists
-load_dotenv()
-
-# Load environment variables from .env file if it exists
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    # python-dotenv not installed, will use system environment variables only
-    pass
+# Placeholder values for API keys
+PLACEHOLDER_ANTHROPIC_API_KEY = 'your_anthropic_api_key'
 
 # WordPress Configuration
 WORDPRESS_CONFIG: Dict[str, str] = {
@@ -43,9 +32,13 @@ INSTAGRAM_CONFIG: Dict[str, str] = {
     'access_token': os.getenv('INSTAGRAM_ACCESS_TOKEN', 'your_access_token'),
 }
 
+# Claude/Anthropic Configuration
+ANTHROPIC_CONFIG: Dict[str, str] = {
+    'api_key': PLACEHOLDER_ANTHROPIC_API_KEY,  # Anthropic API key for Claude
+    'model': 'claude-3-5-sonnet-20241022',  # Claude model to use
+}
+
 # Application Settings
-APP_SETTINGS: Dict[str, any] = {
-    'max_image_size_mb': int(os.getenv('MAX_IMAGE_SIZE_MB', '10')),
 APP_SETTINGS: Dict[str, Any] = {
     'max_image_size_mb': 10,  # Maximum image size in MB
     'supported_formats': ['jpg', 'jpeg', 'png', 'webp'],  # Supported image formats

@@ -111,6 +111,40 @@ try:
 except Exception as e:
     print(f"   ✗ Settings error: {str(e)}")
 
+# Test 7: Essay Drafter
+print("\n7. Testing Essay Drafter...")
+try:
+    from features import EssayDrafter
+    
+    # Check if Anthropic is configured
+    has_valid_api_key = (
+        config.ANTHROPIC_CONFIG.get('api_key') != config.PLACEHOLDER_ANTHROPIC_API_KEY
+    )
+    
+    # Initialize essay drafter
+    drafter = EssayDrafter(
+        api_key=config.ANTHROPIC_CONFIG.get('api_key', ''),
+        model=config.ANTHROPIC_CONFIG.get('model', 'claude-3-5-sonnet-20241022')
+    )
+    
+    print("   ✓ Essay Drafter initialized")
+    
+    # Check for authorial voice files
+    voice_files = drafter.get_voice_file_names()
+    if voice_files:
+        print(f"   ✓ Found {len(voice_files)} authorial voice file(s):")
+        for vf in voice_files:
+            print(f"     - {vf}")
+    else:
+        print("   ○ No authorial voice files found (add .txt files to authorial_styles/)")
+    
+    print(f"   Anthropic API: {'✓ Configured' if has_valid_api_key else '○ Not configured (template)'}")
+    
+    if not has_valid_api_key:
+        print("   ℹ  Edit config.py to add your Anthropic API key for full functionality")
+    
+except Exception as e:
+    print(f"   ✗ Essay Drafter error: {str(e)}")
 # Test 7: Unified Workflow Configuration
 print("\n7. Testing Unified Workflow Configuration...")
 try:
@@ -236,6 +270,12 @@ print("✓ Platform-specific image size adjustments")
 print("✓ Environment variable support (.env)")
 print("✓ Enhanced error logging and reporting")
 print("\nNext steps:")
+print("1. Edit config.py with your platform credentials")
+print("2. Add Anthropic API key for essay drafting feature")
+print("3. Add authorial voice files to authorial_styles/ directory")
+print("4. Install Tesseract OCR: sudo apt install tesseract-ocr (Linux)")
+print("5. Run 'python main.py' to launch the app (requires Kivy)")
+print("6. Or build for mobile with 'buildozer android debug'")
 print("1. Create a .env file from .env.template and add your platform credentials")
 print("2. Run 'python main.py' to launch the app (requires Kivy)")
 print("3. Or build for mobile with 'buildozer android debug'")

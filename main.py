@@ -4,18 +4,20 @@ Main application entry point.
 """
 
 import os
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
 from kivy.properties import StringProperty, BooleanProperty, ListProperty
 from kivy.clock import Clock
 from kivymd.app import MDApp
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.list import OneLineListItem
+from kivymd.uix.list import OneLineListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
-from plyer import filechooser
+from kivymd.uix.textfield import MDTextField
+from plyer import filechooser, clipboard
 import threading
 
 # Import services
@@ -31,6 +33,7 @@ from utils.filters import ImageFilters
 # Import features
 from features.templates import PostTemplates
 from features.scheduler import Scheduler
+from features.essay_drafter import EssayDrafter
 
 # Import configuration
 import config
@@ -58,6 +61,7 @@ class PostboiApp(MDApp):
         self.image_filters = ImageFilters()
         self.post_templates = PostTemplates()
         self.scheduler: Optional[Scheduler] = None
+        self.essay_drafter: Optional[EssayDrafter] = None
 
         # UI components
         self.dialog: Optional[MDDialog] = None
@@ -110,6 +114,23 @@ class PostboiApp(MDApp):
             self.scheduler = Scheduler(
                 share_callback=self._scheduler_share_callback
             )
+
+            # Initialize Essay Drafter
+            has_valid_anthropic_api_key = (
+                config.ANTHROPIC_CONFIG.get('api_key')
+                and config.ANTHROPIC_CONFIG['api_key'] != config.PLACEHOLDER_ANTHROPIC_API_KEY
+            )
+            if has_valid_anthropic_api_key:
+                self.essay_drafter = EssayDrafter(
+                    api_key=config.ANTHROPIC_CONFIG['api_key'],
+                    model=config.ANTHROPIC_CONFIG.get('model', 'claude-3-5-sonnet-20241022')
+                )
+            else:
+                # Initialize without API key - user will need to configure it
+                self.essay_drafter = EssayDrafter(
+                    api_key='',
+                    model='claude-3-5-sonnet-20241022'
+                )
 
         except Exception as e:
             print(f"Error initializing services: {str(e)}")
@@ -325,6 +346,163 @@ class PostboiApp(MDApp):
             ],
         )
         self.dialog.open()
+
+    def on_draft_essay_button(self):
+        """Handle draft essay button press."""
+        # Validation
+        if not self.selected_image:
+            self.show_error_dialog("Please select a screenshot first")
+            return
+
+        if not self.essay_drafter:
+            self.show_error_dialog("Essay drafter not initialized")
+            return
+
+        # Check for authorial voice files
+        voice_files = self.essay_drafter.get_voice_file_names()
+        if not voice_files:
+            self.show_error_dialog(
+                "No authorial voice files found. Please add .txt files to the authorial_styles/ directory."
+            )
+            return
+
+        # Show voice selection dialog if multiple files
+        if len(voice_files) > 1:
+            self._show_voice_selection_dialog(voice_files)
+        else:
+            # Proceed with default (only) voice
+            self._start_essay_drafting(0)
+
+    def _show_voice_selection_dialog(self, voice_files: List[str]):
+        """Show dialog for selecting authorial voice."""
+        if self.dialog:
+            self.dialog.dismiss()
+
+        # Create list items for voice files
+        items = []
+        for i, filename in enumerate(voice_files):
+            item = OneLineListItem(
+                text=filename,
+                on_release=lambda x, idx=i: self._on_voice_selected(idx)
+            )
+            items.append(item)
+
+        # Create dialog with list
+        list_view = MDList()
+        for item in items:
+            list_view.add_widget(item)
+
+        scroll = ScrollView()
+        scroll.add_widget(list_view)
+
+        self.dialog = MDDialog(
+            title="Select Authorial Voice",
+            type="custom",
+            content_cls=scroll,
+            size_hint=(0.8, 0.6),
+            buttons=[
+                MDFlatButton(
+                    text="CANCEL",
+                    on_release=lambda x: self.dialog.dismiss()
+                )
+            ],
+        )
+        self.dialog.open()
+
+    def _on_voice_selected(self, voice_index: int):
+        """Handle voice selection."""
+        if self.dialog:
+            self.dialog.dismiss()
+        self._start_essay_drafting(voice_index)
+
+    def _start_essay_drafting(self, voice_index: int):
+        """Start essay drafting in background thread."""
+        self.is_loading = True
+        threading.Thread(
+            target=self._draft_essay_from_screenshot,
+            args=(self.selected_image, voice_index),
+            daemon=True
+        ).start()
+
+    def _draft_essay_from_screenshot(self, image_path: str, voice_index: int):
+        """Draft essay from screenshot in background thread."""
+        try:
+            # Process screenshot to essay
+            result = self.essay_drafter.process_screenshot_to_essay(
+                image_path,
+                voice_index
+            )
+
+            # Show results on main thread
+            Clock.schedule_once(
+                lambda dt: self._on_essay_draft_complete(result),
+                0
+            )
+
+        except Exception as e:
+            Clock.schedule_once(
+                lambda dt: self.show_error_dialog(f"Error drafting essay: {str(e)}"),
+                0
+            )
+        finally:
+            Clock.schedule_once(lambda dt: setattr(self, 'is_loading', False), 0)
+
+    def _on_essay_draft_complete(self, result: Dict):
+        """Handle essay draft completion on main thread."""
+        self.is_loading = False
+
+        if not result['success']:
+            self.show_error_dialog(f"Essay drafting failed: {result.get('error', 'Unknown error')}")
+            return
+
+        # Format essay for Substack
+        formatted_essay = self.essay_drafter.format_for_substack(result['essay'])
+
+        # Show essay in a dialog with copy functionality
+        self._show_essay_dialog(formatted_essay, result)
+
+    def _show_essay_dialog(self, essay: str, result: Dict):
+        """Show dialog with drafted essay."""
+        # Create a scrollable text field with the essay
+        text_field = MDTextField(
+            text=essay,
+            multiline=True,
+            readonly=True,
+            size_hint_y=None,
+            height="400dp"
+        )
+
+        scroll = ScrollView(size_hint=(1, 1))
+        scroll.add_widget(text_field)
+
+        if self.dialog:
+            self.dialog.dismiss()
+
+        self.dialog = MDDialog(
+            title=f"Essay Draft (Voice: {result['authorial_voice_file']})",
+            type="custom",
+            content_cls=scroll,
+            size_hint=(0.9, 0.8),
+            buttons=[
+                MDFlatButton(
+                    text="COPY TO CLIPBOARD",
+                    on_release=lambda x: self._copy_essay_to_clipboard(essay)
+                ),
+                MDFlatButton(
+                    text="CLOSE",
+                    on_release=lambda x: self.dialog.dismiss()
+                )
+            ],
+        )
+        self.dialog.open()
+
+    def _copy_essay_to_clipboard(self, essay: str):
+        """Copy essay to clipboard."""
+        try:
+            clipboard.copy(essay)
+            self.show_info_dialog("Essay copied to clipboard!")
+        except Exception as e:
+            self.show_error_dialog(f"Failed to copy to clipboard: {str(e)}")
 
     def on_stop(self):
         """Called when the app is closing."""
