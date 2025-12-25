@@ -1,0 +1,391 @@
+/* ==========================================================================
+   Good News Network - Stylesheet
+   Modern, responsive design with grid layout and interactive effects
+   ========================================================================== */
+
+/* CSS Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Color Palette */
+    --primary-color: #2563eb;
+    --secondary-color: #1e40af;
+    --accent-color: #f59e0b;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --white: #ffffff;
+    --background: #f9fafb;
+    --card-shadow: rgba(0, 0, 0, 0.1);
+    --overlay-bg: rgba(0, 0, 0, 0.7);
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    
+    /* Typography */
+    --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.5rem;
+    --font-size-2xl: 2rem;
+    --font-size-3xl: 2.5rem;
+    
+    /* Effects */
+    --transition-fast: 0.2s ease;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    --border-radius: 12px;
+    --shadow-sm: 0 2px 4px var(--card-shadow);
+    --shadow-md: 0 4px 8px var(--card-shadow);
+    --shadow-lg: 0 8px 16px var(--card-shadow);
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--background);
+    color: var(--text-dark);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    width: 100%;
+}
+
+/* ==========================================================================
+   Header Section
+   ========================================================================== */
+.header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--white);
+    padding: var(--spacing-xl) 0;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+.logo {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    letter-spacing: -0.5px;
+}
+
+.tagline {
+    font-size: var(--font-size-lg);
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+/* ==========================================================================
+   Main Content
+   ========================================================================== */
+.main-content {
+    flex: 1;
+    padding: var(--spacing-xl) 0;
+}
+
+/* Articles Grid Layout */
+.articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+/* Article Card */
+.article-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.article-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.article-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* Image Wrapper */
+.article-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    background-color: #e5e7eb;
+}
+
+.article-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.article-card:hover .article-image {
+    transform: scale(1.1);
+}
+
+/* Article Overlay */
+.article-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, var(--overlay-bg) 0%, rgba(0, 0, 0, 0.5) 70%, transparent 100%);
+    color: var(--white);
+    padding: var(--spacing-lg);
+    transform: translateY(0);
+    transition: all var(--transition-base);
+}
+
+.article-card:hover .article-overlay {
+    background: linear-gradient(to top, var(--overlay-bg) 0%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.article-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.3;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.article-subtitle {
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    opacity: 0.95;
+    line-height: 1.5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================================================
+   Footer Section
+   ========================================================================== */
+.footer {
+    background-color: var(--text-dark);
+    color: var(--white);
+    text-align: center;
+    padding: var(--spacing-lg);
+    margin-top: auto;
+}
+
+.footer p {
+    margin: var(--spacing-xs) 0;
+    opacity: 0.8;
+}
+
+/* ==========================================================================
+   Loading State (for dynamic content)
+   ========================================================================== */
+.loading {
+    text-align: center;
+    padding: var(--spacing-xl);
+    font-size: var(--font-size-lg);
+    color: var(--text-light);
+}
+
+.loading::after {
+    content: '...';
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+/* Large Tablets and Small Desktops (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .articles-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--spacing-md);
+    }
+    
+    .logo {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .article-title {
+        font-size: var(--font-size-lg);
+    }
+}
+
+/* Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+    :root {
+        --spacing-xl: 2rem;
+        --spacing-lg: 1.5rem;
+    }
+    
+    .header {
+        padding: var(--spacing-lg) 0;
+    }
+    
+    .logo {
+        font-size: var(--font-size-xl);
+    }
+    
+    .tagline {
+        font-size: var(--font-size-base);
+    }
+    
+    .articles-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: var(--spacing-sm);
+    }
+    
+    .article-overlay {
+        padding: var(--spacing-md);
+    }
+    
+    .article-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    .article-subtitle {
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* Mobile Devices (max-width: 480px) */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .articles-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    .article-card {
+        max-width: 100%;
+    }
+    
+    .article-image-wrapper {
+        aspect-ratio: 16 / 11;
+    }
+    
+    .article-overlay {
+        padding: var(--spacing-sm);
+    }
+    
+    .article-title {
+        font-size: var(--font-size-base);
+        margin-bottom: 0.25rem;
+    }
+    
+    .article-subtitle {
+        font-size: var(--font-size-xs);
+        line-height: 1.4;
+    }
+    
+    /* Reduce hover effect on mobile for better touch experience */
+    .article-card:hover {
+        transform: translateY(-4px);
+    }
+}
+
+/* Extra Small Mobile Devices (max-width: 360px) */
+@media (max-width: 360px) {
+    .logo {
+        font-size: var(--font-size-lg);
+    }
+    
+    .tagline {
+        font-size: var(--font-size-sm);
+    }
+    
+    .main-content {
+        padding: var(--spacing-md) 0;
+    }
+}
+
+/* ==========================================================================
+   Accessibility Improvements
+   ========================================================================== */
+
+/* Focus states for keyboard navigation */
+.article-link:focus {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 4px;
+}
+
+.article-link:focus .article-card {
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3);
+}
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .article-overlay {
+        background: rgba(0, 0, 0, 0.9);
+    }
+    
+    .article-card {
+        border: 2px solid var(--text-dark);
+    }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+@media print {
+    .header {
+        background: none;
+        color: var(--text-dark);
+        box-shadow: none;
+    }
+    
+    .article-card {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+    
+    .article-card:hover {
+        transform: none;
+    }
+    
+    .footer {
+        background: none;
+        color: var(--text-dark);
+    }
+}
