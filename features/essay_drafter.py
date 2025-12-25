@@ -112,8 +112,8 @@ class EssayDrafter:
                 return False, f"Image file not found: {image_path}"
 
             # Open image and perform OCR
-            image = Image.open(image_path)
-            text = pytesseract.image_to_string(image)
+            with Image.open(image_path) as image:
+                text = pytesseract.image_to_string(image)
 
             if not text or len(text.strip()) < self.min_text_length:
                 return False, "No text could be extracted from the image. Please ensure the image contains readable text."
