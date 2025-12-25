@@ -152,6 +152,9 @@ templates.json
 authorial_styles/*.txt
 !authorial_styles/example_voice.txt
 
+# Test screenshots
+test_screenshot.png
+
 # Temporary image files
 *_resized.*
 *_thumb.*
