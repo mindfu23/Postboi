@@ -1,39 +1,49 @@
 """
 Configuration file for Postboi application.
-Copy this file and update with your actual credentials.
+Loads sensitive credentials from environment variables.
+Create a .env file based on .env.template and populate with your credentials.
 """
 
+import os
 from typing import Dict, List
+
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # python-dotenv not installed, will use system environment variables only
+    pass
 
 # WordPress Configuration
 WORDPRESS_CONFIG: Dict[str, str] = {
-    'site_url': 'https://yoursite.wordpress.com',  # Your WordPress site URL
-    'username': 'your_username',  # WordPress username
-    'app_password': 'xxxx xxxx xxxx xxxx xxxx xxxx',  # Application password (with spaces)
-    'rss_feed_url': 'https://yoursite.wordpress.com/feed/',  # RSS feed URL
+    'site_url': os.getenv('WORDPRESS_SITE_URL', 'https://yoursite.wordpress.com'),
+    'username': os.getenv('WORDPRESS_USERNAME', 'your_username'),
+    'app_password': os.getenv('WORDPRESS_APP_PASSWORD', 'xxxx xxxx xxxx xxxx xxxx xxxx'),
+    'rss_feed_url': os.getenv('WORDPRESS_SITE_URL', 'https://yoursite.wordpress.com') + '/feed/' if os.getenv('WORDPRESS_SITE_URL') else 'https://yoursite.wordpress.com/feed/',
 }
 
 # Facebook Configuration
 FACEBOOK_CONFIG: Dict[str, str] = {
-    'app_id': 'your_app_id',  # Facebook App ID
-    'app_secret': 'your_app_secret',  # Facebook App Secret
-    'access_token': 'your_page_access_token',  # Page Access Token (long-lived)
-    'page_id': 'your_page_id',  # Facebook Page ID
+    'app_id': os.getenv('FACEBOOK_APP_ID', 'your_app_id'),
+    'app_secret': os.getenv('FACEBOOK_APP_SECRET', 'your_app_secret'),
+    'access_token': os.getenv('FACEBOOK_ACCESS_TOKEN', 'your_page_access_token'),
+    'page_id': os.getenv('FACEBOOK_PAGE_ID', 'your_page_id'),
 }
 
 # Instagram Configuration
 INSTAGRAM_CONFIG: Dict[str, str] = {
-    'business_account_id': 'your_instagram_business_account_id',  # Instagram Business Account ID
-    'access_token': 'your_access_token',  # Access token (same as Facebook if linked)
+    'business_account_id': os.getenv('INSTAGRAM_BUSINESS_ACCOUNT_ID', 'your_instagram_business_account_id'),
+    'access_token': os.getenv('INSTAGRAM_ACCESS_TOKEN', 'your_access_token'),
 }
 
 # Application Settings
 APP_SETTINGS: Dict[str, any] = {
-    'max_image_size_mb': 10,  # Maximum image size in MB
+    'max_image_size_mb': int(os.getenv('MAX_IMAGE_SIZE_MB', '10')),
     'supported_formats': ['jpg', 'jpeg', 'png', 'webp'],  # Supported image formats
     'thumbnail_size': (300, 300),  # Thumbnail dimensions
     'max_caption_length': 2200,  # Maximum caption length (Instagram limit)
-    'concurrent_uploads': 3,  # Number of concurrent platform uploads
+    'concurrent_uploads': int(os.getenv('CONCURRENT_UPLOADS', '3')),
 }
 
 # Image Filter Presets
