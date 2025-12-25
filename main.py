@@ -114,8 +114,11 @@ class PostboiApp(MDApp):
             )
 
             # Initialize Essay Drafter
-            if config.ANTHROPIC_CONFIG.get('api_key') and \
-               config.ANTHROPIC_CONFIG['api_key'] != 'your_anthropic_api_key':
+            has_valid_anthropic_api_key = (
+                config.ANTHROPIC_CONFIG.get('api_key')
+                and config.ANTHROPIC_CONFIG['api_key'] != 'your_anthropic_api_key'
+            )
+            if has_valid_anthropic_api_key:
                 self.essay_drafter = EssayDrafter(
                     api_key=config.ANTHROPIC_CONFIG['api_key'],
                     model=config.ANTHROPIC_CONFIG.get('model', 'claude-3-5-sonnet-20241022')
