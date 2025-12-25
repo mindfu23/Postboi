@@ -4,7 +4,6 @@ Create a sample screenshot image with text for testing OCR functionality.
 """
 
 from PIL import Image, ImageDraw, ImageFont
-import os
 
 def create_test_screenshot():
     """Create a test screenshot with readable text."""
@@ -46,7 +45,7 @@ maintain work-life boundaries in the digital age.
     try:
         # Try to use a default font, fall back to PIL default if not available
         font = ImageFont.load_default()
-    except:
+    except Exception:
         font = None
     
     # Draw the text

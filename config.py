@@ -3,7 +3,10 @@ Configuration file for Postboi application.
 Copy this file and update with your actual credentials.
 """
 
-from typing import Dict, List
+from typing import Any, Dict, List
+
+# Placeholder values for API keys
+PLACEHOLDER_ANTHROPIC_API_KEY = 'your_anthropic_api_key'
 
 # WordPress Configuration
 WORDPRESS_CONFIG: Dict[str, str] = {
@@ -29,12 +32,12 @@ INSTAGRAM_CONFIG: Dict[str, str] = {
 
 # Claude/Anthropic Configuration
 ANTHROPIC_CONFIG: Dict[str, str] = {
-    'api_key': 'your_anthropic_api_key',  # Anthropic API key for Claude
+    'api_key': PLACEHOLDER_ANTHROPIC_API_KEY,  # Anthropic API key for Claude
     'model': 'claude-3-5-sonnet-20241022',  # Claude model to use
 }
 
 # Application Settings
-APP_SETTINGS: Dict[str, any] = {
+APP_SETTINGS: Dict[str, Any] = {
     'max_image_size_mb': 10,  # Maximum image size in MB
     'supported_formats': ['jpg', 'jpeg', 'png', 'webp'],  # Supported image formats
     'thumbnail_size': (300, 300),  # Thumbnail dimensions

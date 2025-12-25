@@ -4,10 +4,14 @@ Extracts text from screenshots and drafts essays based on authorial voice files.
 """
 
 import os
-from typing import Dict, List, Optional, Tuple
+import logging
+from typing import Any, Dict, List, Optional, Tuple
 from PIL import Image
 import pytesseract
 from anthropic import Anthropic
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 class EssayDrafter:
@@ -32,7 +36,10 @@ class EssayDrafter:
         self.model = model
         self.authorial_styles_dir = authorial_styles_dir
         self.min_text_length = min_text_length
-        self.client = Anthropic(api_key=api_key) if api_key and api_key != 'your_anthropic_api_key' else None
+        
+        # Import config to use the constant
+        import config
+        self.client = Anthropic(api_key=api_key) if api_key and api_key != config.PLACEHOLDER_ANTHROPIC_API_KEY else None
 
     def get_authorial_voice_files(self) -> List[str]:
         """
@@ -55,6 +62,10 @@ class EssayDrafter:
     def select_authorial_voice(self, voice_index: Optional[int] = None) -> Optional[str]:
         """
         Select an authorial voice file.
+        
+        If only one voice file exists, it is auto-selected.
+        If voice_index is provided and valid, that file is selected.
+        Otherwise, the first available file is returned as default.
 
         Args:
             voice_index: Index of voice file to use (None for auto-selection)
@@ -93,7 +104,7 @@ class EssayDrafter:
             with open(voice_file, 'r', encoding='utf-8') as f:
                 return f.read()
         except Exception as e:
-            print(f"Error loading authorial voice: {str(e)}")
+            logger.error(f"Error loading authorial voice: {str(e)}")
             return None
 
     def extract_text_from_image(self, image_path: str) -> Tuple[bool, str]:
@@ -228,14 +239,14 @@ Write the essay now:"""
 
     def process_screenshot_to_essay(self, image_path: str,
                                    voice_index: Optional[int] = None,
-                                   additional_instructions: str = "") -> Dict[str, any]:
+                                   additional_instructions: str = "") -> Dict[str, Any]:
         """
         Complete workflow: extract text from screenshot and draft essay.
 
         Args:
             image_path: Path to screenshot image
             voice_index: Index of authorial voice to use (None for auto)
-            additional_instructions: Optional additional instructions for essay
+            additional_instructions: Optional additional instructions for essay (max 500 chars)
 
         Returns:
             Dictionary with results:
@@ -256,6 +267,12 @@ Write the essay now:"""
             'authorial_voice_file': '',
             'error': ''
         }
+
+        # Validate and truncate additional instructions if needed
+        max_instruction_length = 500
+        if additional_instructions and len(additional_instructions) > max_instruction_length:
+            logger.warning(f"Additional instructions truncated from {len(additional_instructions)} to {max_instruction_length} characters")
+            additional_instructions = additional_instructions[:max_instruction_length]
 
         # Step 1: Extract text from screenshot
         success, extracted_text = self.extract_text_from_image(image_path)

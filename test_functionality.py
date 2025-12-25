@@ -115,8 +115,8 @@ try:
     from features import EssayDrafter
     
     # Check if Anthropic is configured
-    anthropic_configured = (
-        config.ANTHROPIC_CONFIG.get('api_key') != 'your_anthropic_api_key'
+    has_valid_api_key = (
+        config.ANTHROPIC_CONFIG.get('api_key') != config.PLACEHOLDER_ANTHROPIC_API_KEY
     )
     
     # Initialize essay drafter
@@ -136,9 +136,9 @@ try:
     else:
         print("   ○ No authorial voice files found (add .txt files to authorial_styles/)")
     
-    print(f"   Anthropic API: {'✓ Configured' if anthropic_configured else '○ Not configured (template)'}")
+    print(f"   Anthropic API: {'✓ Configured' if has_valid_api_key else '○ Not configured (template)'}")
     
-    if not anthropic_configured:
+    if not has_valid_api_key:
         print("   ℹ  Edit config.py to add your Anthropic API key for full functionality")
     
 except Exception as e:

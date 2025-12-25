@@ -8,14 +8,16 @@ from typing import Dict, Optional, List
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
 from kivy.properties import StringProperty, BooleanProperty, ListProperty
 from kivy.clock import Clock
 from kivymd.app import MDApp
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
-from kivymd.uix.list import OneLineListItem
+from kivymd.uix.list import OneLineListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
-from plyer import filechooser
+from kivymd.uix.textfield import MDTextField
+from plyer import filechooser, clipboard
 import threading
 
 # Import services
@@ -116,7 +118,7 @@ class PostboiApp(MDApp):
             # Initialize Essay Drafter
             has_valid_anthropic_api_key = (
                 config.ANTHROPIC_CONFIG.get('api_key')
-                and config.ANTHROPIC_CONFIG['api_key'] != 'your_anthropic_api_key'
+                and config.ANTHROPIC_CONFIG['api_key'] != config.PLACEHOLDER_ANTHROPIC_API_KEY
             )
             if has_valid_anthropic_api_key:
                 self.essay_drafter = EssayDrafter(
@@ -352,9 +354,6 @@ class PostboiApp(MDApp):
             items.append(item)
 
         # Create dialog with list
-        from kivymd.uix.list import MDList
-        from kivy.uix.scrollview import ScrollView
-
         list_view = MDList()
         for item in items:
             list_view.add_widget(item)
@@ -416,6 +415,7 @@ class PostboiApp(MDApp):
 
     def _on_essay_draft_complete(self, result: Dict):
         """Handle essay draft completion on main thread."""
+        self.is_loading = False
 
         if not result['success']:
             self.show_error_dialog(f"Essay drafting failed: {result.get('error', 'Unknown error')}")
@@ -429,9 +429,6 @@ class PostboiApp(MDApp):
 
     def _show_essay_dialog(self, essay: str, result: Dict):
         """Show dialog with drafted essay."""
-        from kivymd.uix.textfield import MDTextField
-        from kivy.uix.scrollview import ScrollView
-
         # Create a scrollable text field with the essay
         text_field = MDTextField(
             text=essay,
@@ -468,7 +465,6 @@ class PostboiApp(MDApp):
     def _copy_essay_to_clipboard(self, essay: str):
         """Copy essay to clipboard."""
         try:
-            from plyer import clipboard
             clipboard.copy(essay)
             self.show_info_dialog("Essay copied to clipboard!")
         except Exception as e:

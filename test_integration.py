@@ -18,13 +18,12 @@ print("=" * 70)
 print("\n1. Checking Tesseract OCR Installation...")
 try:
     import pytesseract
-    from PIL import Image
     
     # Try to get tesseract version
     try:
         version = pytesseract.get_tesseract_version()
         print(f"   ✓ Tesseract OCR installed (version {version})")
-    except:
+    except Exception:
         print("   ✗ Tesseract OCR not installed or not in PATH")
         print("   ℹ  Install with: sudo apt install tesseract-ocr (Ubuntu/Debian)")
         print("   ℹ  Or: brew install tesseract (macOS)")
@@ -111,12 +110,12 @@ try:
         print(f"   ✓ Loaded voice content ({len(voice_content)} characters)")
     
     # Check API configuration
-    api_configured = (
+    has_valid_api_key = (
         config.ANTHROPIC_CONFIG.get('api_key') and
-        config.ANTHROPIC_CONFIG['api_key'] != 'your_anthropic_api_key'
+        config.ANTHROPIC_CONFIG['api_key'] != config.PLACEHOLDER_ANTHROPIC_API_KEY
     )
     
-    if api_configured:
+    if has_valid_api_key:
         print("   ✓ Anthropic API configured")
         
         if tesseract_available and test_image_path:
@@ -168,7 +167,7 @@ print(f"  • Essay Drafter Module: ✓ Working")
 print(f"  • Authorial Voice Files: ✓ Available")
 print(f"  • Tesseract OCR: {'✓ Installed' if tesseract_available else '○ Not installed'}")
 print(f"  • Test Screenshot: {'✓ Available' if test_image_path else '○ Not available'}")
-print(f"  • Anthropic API: {'✓ Configured' if api_configured else '○ Not configured'}")
+print(f"  • Anthropic API: {'✓ Configured' if has_valid_api_key else '○ Not configured'}")
 
 print("\nFeature Capabilities:")
 print("  ✓ Load and manage authorial voice files")
@@ -177,7 +176,7 @@ if tesseract_available:
     print("  ✓ Extract text from screenshots using OCR")
 else:
     print("  ○ OCR functionality (requires Tesseract)")
-if api_configured:
+if has_valid_api_key:
     print("  ✓ Generate essays using Claude AI")
 else:
     print("  ○ AI essay generation (requires Anthropic API key)")
@@ -185,11 +184,11 @@ else:
 print("\nNext Steps:")
 if not tesseract_available:
     print("1. Install Tesseract OCR for text extraction")
-if not api_configured:
+if not has_valid_api_key:
     print("2. Configure Anthropic API key in config.py")
 if not test_image_path:
     print("3. Run 'python create_test_image.py' to create test screenshot")
-if tesseract_available and api_configured and test_image_path:
+if tesseract_available and has_valid_api_key and test_image_path:
     print("✓ All components ready!")
     print("  Run with RUN_FULL_TEST=1 to test complete workflow")
 

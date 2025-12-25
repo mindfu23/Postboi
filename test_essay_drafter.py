@@ -99,12 +99,12 @@ except Exception as e:
 # Test 7: Test API Configuration
 print("\n7. Testing API Configuration...")
 try:
-    api_configured = (
+    has_valid_api_key = (
         config.ANTHROPIC_CONFIG.get('api_key') and
-        config.ANTHROPIC_CONFIG['api_key'] != 'your_anthropic_api_key'
+        config.ANTHROPIC_CONFIG['api_key'] != config.PLACEHOLDER_ANTHROPIC_API_KEY
     )
     
-    if api_configured:
+    if has_valid_api_key:
         print("   ✓ Anthropic API key configured")
         print("   ℹ  Full essay drafting functionality available")
     else:
