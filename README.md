@@ -10,6 +10,11 @@ Cross-platform mobile app (iOS & Android) for sharing images and text to Instagr
   - Instagram (Business/Creator accounts via API, Personal via native share)
   - Facebook (Pages via Graph API)
   - WordPress (via REST API with featured images)
+- 🚀 **Unified Posting Workflow** - NEW! Upload once, post everywhere:
+  - Platform-specific caption adjustments (Instagram hashtag limits, etc.)
+  - Automatic image resizing for each platform's requirements
+  - Automatic retry logic with configurable attempts
+  - Detailed error logging and resolution suggestions
 - 🎨 **Image Filters** - Apply beautiful filters before sharing:
   - Grayscale, Sepia, Vintage
   - Brightness & Contrast adjustments
@@ -20,6 +25,7 @@ Cross-platform mobile app (iOS & Android) for sharing images and text to Instagr
   - Custom template creation
 - ⏰ **Scheduled Posting** - Schedule posts for optimal engagement times
 - 🔄 **Concurrent Uploads** - Fast simultaneous posting using ThreadPoolExecutor
+- 🔒 **Secure Configuration** - Environment variable support via .env files
 
 ## 🛠️ Tech Stack
 
@@ -68,6 +74,28 @@ pip install -r requirements.txt
 ### 3. Configure Platform Credentials
 
 **Option A: Using Environment Variables (Recommended)**
+
+1. Copy the example file:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` with your credentials:
+```env
+WORDPRESS_SITE_URL=https://yoursite.wordpress.com
+WORDPRESS_USERNAME=your_username
+WORDPRESS_APP_PASSWORD=your_app_password
+
+FACEBOOK_PAGE_ID=your_page_id
+FACEBOOK_ACCESS_TOKEN=your_access_token
+
+INSTAGRAM_BUSINESS_ACCOUNT_ID=your_account_id
+INSTAGRAM_ACCESS_TOKEN=your_access_token
+```
+
+**Option B: Direct Configuration**
+
+Edit `config.py` and add your platform credentials:
 
 1. Copy the `.env.template` file to create a `.env` file:
    ```bash
@@ -600,6 +628,13 @@ This project is open source and available under the [MIT License](LICENSE).
 For issues, questions, or suggestions:
 - 🐛 [Open an Issue](https://github.com/mindfu23/Postboi/issues)
 - 💬 [Discussions](https://github.com/mindfu23/Postboi/discussions)
+
+## 📚 Documentation
+
+- [Unified Workflow Guide](UNIFIED_WORKFLOW.md) - Comprehensive guide to the unified posting workflow
+- [Architecture](ARCHITECTURE.md) - System architecture and design
+- [Contributing](CONTRIBUTING.md) - How to contribute to the project
+- [Verification](VERIFICATION.md) - Testing and verification procedures
 
 ## 🗺️ Roadmap
 
