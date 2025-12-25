@@ -148,6 +148,10 @@ config_local.py
 scheduled_posts.json
 templates.json
 
+# Essay drafting - user's private authorial voice files
+authorial_styles/*.txt
+!authorial_styles/example_voice.txt
+
 # Temporary image files
 *_resized.*
 *_thumb.*

@@ -27,6 +27,12 @@ INSTAGRAM_CONFIG: Dict[str, str] = {
     'access_token': 'your_access_token',  # Access token (same as Facebook if linked)
 }
 
+# Claude/Anthropic Configuration
+ANTHROPIC_CONFIG: Dict[str, str] = {
+    'api_key': 'your_anthropic_api_key',  # Anthropic API key for Claude
+    'model': 'claude-3-5-sonnet-20241022',  # Claude model to use
+}
+
 # Application Settings
 APP_SETTINGS: Dict[str, any] = {
     'max_image_size_mb': 10,  # Maximum image size in MB

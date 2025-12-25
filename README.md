@@ -20,6 +20,11 @@ Cross-platform mobile app (iOS & Android) for sharing images and text to Instagr
   - Custom template creation
 - ⏰ **Scheduled Posting** - Schedule posts for optimal engagement times
 - 🔄 **Concurrent Uploads** - Fast simultaneous posting using ThreadPoolExecutor
+- ✍️ **AI Essay Drafting** - Draft essays from screenshots using AI:
+  - Upload screenshots from computer or mobile
+  - Extract text using OCR (Optical Character Recognition)
+  - Draft essays in your authorial voice using Claude AI
+  - Format output for Substack and other blogging platforms
 
 ## 🛠️ Tech Stack
 
@@ -29,6 +34,8 @@ Cross-platform mobile app (iOS & Android) for sharing images and text to Instagr
 - **Plyer 2.1.0+** - Cross-platform APIs (file picker, camera, etc.)
 - **Pillow 10.3.0+** - Image processing (security patched)
 - **APScheduler 3.10.4+** - Job scheduling
+- **Pytesseract 0.3.10+** - OCR for text extraction
+- **Anthropic 0.40.0+** - Claude AI integration for essay drafting
 - **Buildozer 1.5.0+** - Android app builder
 - **kivy-ios 1.3.0+** - iOS app builder
 
@@ -257,6 +264,130 @@ ig = InstagramService(
 success, message = ig.test_connection()
 print(message)
 ```
+
+### Essay Drafting Setup
+
+The Essay Drafting feature allows you to extract text from screenshots and draft essays in your unique authorial voice using AI.
+
+#### 1. Install Tesseract OCR
+
+**Ubuntu/Debian:**
+```bash
+sudo apt install tesseract-ocr
+```
+
+**macOS:**
+```bash
+brew install tesseract
+```
+
+**Windows:**
+- Download installer from: https://github.com/UB-Mannheim/tesseract/wiki
+- Add Tesseract to your system PATH
+
+#### 2. Configure Anthropic API
+
+1. Sign up for an Anthropic account at [https://www.anthropic.com/](https://www.anthropic.com/)
+2. Generate an API key from your account dashboard
+3. Add your API key to `config.py`:
+
+```python
+ANTHROPIC_CONFIG = {
+    'api_key': 'your_anthropic_api_key',
+    'model': 'claude-3-5-sonnet-20241022',
+}
+```
+
+#### 3. Create Authorial Voice Files
+
+Create text files in the `authorial_styles/` directory to define your writing style:
+
+```bash
+cd authorial_styles/
+nano my_voice.txt
+```
+
+Example authorial voice file structure:
+```
+Writing Style: Professional yet conversational, with wit and humor
+
+Tone Characteristics:
+- Engaging and accessible to a general audience
+- Uses clear, concise language while maintaining depth
+- Incorporates relevant examples and anecdotes
+
+Structural Preferences:
+- Starts with a compelling hook or question
+- Uses short paragraphs (2-4 sentences)
+- Ends with a thought-provoking conclusion
+
+Common Phrases:
+- "Here's the thing..."
+- "Let's be honest..."
+- "Think about it this way..."
+```
+
+You can create multiple voice files for different writing styles. The app will:
+- Auto-select if only one file exists
+- Prompt you to choose if multiple files exist
+
+#### 4. Using the Essay Drafter
+
+**From the App:**
+1. Select a screenshot containing text (notes, quotes, ideas)
+2. Click "Draft Essay" button
+3. Select your authorial voice (if multiple available)
+4. Wait for processing:
+   - Text extraction via OCR
+   - Argument summarization
+   - Essay drafting by Claude AI
+5. Review and copy the formatted essay
+
+**Programmatic Usage:**
+```python
+from features.essay_drafter import EssayDrafter
+
+drafter = EssayDrafter(
+    api_key='your_anthropic_api_key',
+    model='claude-3-5-sonnet-20241022'
+)
+
+# Process a screenshot
+result = drafter.process_screenshot_to_essay(
+    image_path='path/to/screenshot.png',
+    voice_index=0,  # Use first voice file
+    additional_instructions='Focus on practical examples'
+)
+
+if result['success']:
+    essay = result['essay']
+    formatted = drafter.format_for_substack(essay)
+    print(formatted)
+else:
+    print(f"Error: {result['error']}")
+```
+
+#### 5. Output Format
+
+The drafted essay is formatted for easy copying to:
+- **Substack** - Markdown-ready format
+- **Medium** - Can be pasted directly
+- **WordPress** - Compatible with block editor
+- **Other blogging platforms** - Standard Markdown format
+
+#### 6. Best Practices
+
+**For Better OCR Results:**
+- Use clear, high-resolution screenshots
+- Ensure text is readable and well-lit
+- Avoid heavily stylized or handwritten fonts
+- Crop images to focus on text content
+
+**For Better Essays:**
+- Create detailed authorial voice profiles
+- Include specific examples in your voice file
+- Provide clear, organized screenshots
+- Use additional instructions for specific focus areas
 
 ## 📱 Building the App
 

@@ -109,6 +109,41 @@ try:
 except Exception as e:
     print(f"   ✗ Settings error: {str(e)}")
 
+# Test 7: Essay Drafter
+print("\n7. Testing Essay Drafter...")
+try:
+    from features import EssayDrafter
+    
+    # Check if Anthropic is configured
+    anthropic_configured = (
+        config.ANTHROPIC_CONFIG.get('api_key') != 'your_anthropic_api_key'
+    )
+    
+    # Initialize essay drafter
+    drafter = EssayDrafter(
+        api_key=config.ANTHROPIC_CONFIG.get('api_key', ''),
+        model=config.ANTHROPIC_CONFIG.get('model', 'claude-3-5-sonnet-20241022')
+    )
+    
+    print("   ✓ Essay Drafter initialized")
+    
+    # Check for authorial voice files
+    voice_files = drafter.get_voice_file_names()
+    if voice_files:
+        print(f"   ✓ Found {len(voice_files)} authorial voice file(s):")
+        for vf in voice_files:
+            print(f"     - {vf}")
+    else:
+        print("   ○ No authorial voice files found (add .txt files to authorial_styles/)")
+    
+    print(f"   Anthropic API: {'✓ Configured' if anthropic_configured else '○ Not configured (template)'}")
+    
+    if not anthropic_configured:
+        print("   ℹ  Edit config.py to add your Anthropic API key for full functionality")
+    
+except Exception as e:
+    print(f"   ✗ Essay Drafter error: {str(e)}")
+
 # Summary
 print("\n" + "=" * 60)
 print("Test Summary")
@@ -116,6 +151,9 @@ print("=" * 60)
 print("All core functionality tests passed!")
 print("\nNext steps:")
 print("1. Edit config.py with your platform credentials")
-print("2. Run 'python main.py' to launch the app (requires Kivy)")
-print("3. Or build for mobile with 'buildozer android debug'")
+print("2. Add Anthropic API key for essay drafting feature")
+print("3. Add authorial voice files to authorial_styles/ directory")
+print("4. Install Tesseract OCR: sudo apt install tesseract-ocr (Linux)")
+print("5. Run 'python main.py' to launch the app (requires Kivy)")
+print("6. Or build for mobile with 'buildozer android debug'")
 print("=" * 60)
