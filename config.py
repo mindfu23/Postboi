@@ -4,7 +4,7 @@ Copy this file and update with your actual credentials.
 """
 
 import os
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 from dotenv import load_dotenv
 
 # Load environment variables from .env file if it exists
@@ -33,7 +33,7 @@ INSTAGRAM_CONFIG: Dict[str, str] = {
 }
 
 # Application Settings
-APP_SETTINGS: Dict[str, any] = {
+APP_SETTINGS: Dict[str, Any] = {
     'max_image_size_mb': 10,  # Maximum image size in MB
     'supported_formats': ['jpg', 'jpeg', 'png', 'webp'],  # Supported image formats
     'thumbnail_size': (300, 300),  # Thumbnail dimensions
@@ -75,7 +75,7 @@ DEFAULT_TEMPLATES: List[Dict[str, str]] = [
 ]
 
 # Unified Workflow Configuration
-UNIFIED_WORKFLOW_CONFIG: Dict[str, any] = {
+UNIFIED_WORKFLOW_CONFIG: Dict[str, Any] = {
     'max_retry_attempts': 3,  # Number of retry attempts for failed uploads
     'retry_delay': 2,  # Delay between retries in seconds
     'timeout': 30,  # Request timeout in seconds
@@ -83,7 +83,7 @@ UNIFIED_WORKFLOW_CONFIG: Dict[str, any] = {
 }
 
 # Platform-Specific Requirements
-PLATFORM_REQUIREMENTS: Dict[str, Dict[str, any]] = {
+PLATFORM_REQUIREMENTS: Dict[str, Dict[str, Any]] = {
     'instagram': {
         'max_caption_length': 2200,  # Instagram caption limit
         'max_hashtags': 30,  # Instagram hashtag limit
