@@ -1,0 +1,25 @@
+# Postboi Android - gradle.properties Template
+# Copy this to gradle.properties in your Android project root (not in version control)
+# These properties will be injected as BuildConfig fields at build time
+
+# WordPress Configuration
+WORDPRESS_SITE_URL=https://yoursite.wordpress.com
+WORDPRESS_USERNAME=your_username
+WORDPRESS_APP_PASSWORD=your_app_password
+
+# Facebook Configuration
+FACEBOOK_APP_ID=your_app_id
+FACEBOOK_APP_SECRET=your_app_secret
+FACEBOOK_ACCESS_TOKEN=your_access_token
+FACEBOOK_PAGE_ID=your_page_id
+
+# Instagram Configuration
+INSTAGRAM_BUSINESS_ACCOUNT_ID=your_business_account_id
+INSTAGRAM_ACCESS_TOKEN=your_access_token
+
+# Application Settings
+MAX_IMAGE_SIZE_MB=10
+CONCURRENT_UPLOADS=3
+
+# Note: Make sure gradle.properties is in your .gitignore
+# Never commit sensitive credentials to version control

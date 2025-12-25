@@ -17,6 +17,8 @@ apscheduler==3.10.4
 # AI and OCR for Essay Drafting
 anthropic==0.40.0
 pytesseract==0.3.10
+# Environment Variables
+python-dotenv==1.0.0
 
 # Build Tools (optional, for development)
 # buildozer==1.5.0
