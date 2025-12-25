@@ -95,7 +95,7 @@ try:
     print(f"   Instagram: {'✓ Configured' if ig_configured else '○ Not configured (template)'}")
     
     if not (wp_configured or fb_configured or ig_configured):
-        print("   ℹ  Edit config.py or .env to add your credentials for full functionality")
+        print("   ℹ  Create a .env file from .env.template and add your credentials for full functionality")
     
 except Exception as e:
     print(f"   ✗ Configuration error: {str(e)}")
@@ -236,7 +236,8 @@ print("✓ Platform-specific image size adjustments")
 print("✓ Environment variable support (.env)")
 print("✓ Enhanced error logging and reporting")
 print("\nNext steps:")
-print("1. Copy .env.example to .env and add your credentials")
+print("1. Create a .env file from .env.template and add your platform credentials")
 print("2. Run 'python main.py' to launch the app (requires Kivy)")
 print("3. Or build for mobile with 'buildozer android debug'")
+print("4. See web/, ios/, and android/ directories for platform-specific starter templates")
 print("=" * 60)

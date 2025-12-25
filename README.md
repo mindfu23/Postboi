@@ -97,29 +97,58 @@ INSTAGRAM_ACCESS_TOKEN=your_access_token
 
 Edit `config.py` and add your platform credentials:
 
-```python
-# WordPress Configuration
-WORDPRESS_CONFIG = {
-    'site_url': 'https://yoursite.wordpress.com',
-    'username': 'your_username',
-    'app_password': 'xxxx xxxx xxxx xxxx xxxx xxxx',
-    'rss_feed_url': 'https://yoursite.wordpress.com/feed/',
-}
+1. Copy the `.env.template` file to create a `.env` file:
+   ```bash
+   cp .env.template .env
+   ```
 
-# Facebook Configuration
-FACEBOOK_CONFIG = {
-    'app_id': 'your_app_id',
-    'app_secret': 'your_app_secret',
-    'access_token': 'your_page_access_token',
-    'page_id': 'your_page_id',
-}
+2. Edit `.env` and add your platform credentials:
+   ```bash
+   # WordPress Configuration
+   WORDPRESS_SITE_URL=https://yoursite.wordpress.com
+   WORDPRESS_USERNAME=your_username
+   WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
+   
+   # Facebook Configuration
+   FACEBOOK_APP_ID=your_app_id
+   FACEBOOK_APP_SECRET=your_app_secret
+   FACEBOOK_ACCESS_TOKEN=your_page_access_token
+   FACEBOOK_PAGE_ID=your_page_id
+   
+   # Instagram Configuration
+   INSTAGRAM_BUSINESS_ACCOUNT_ID=your_instagram_business_account_id
+   INSTAGRAM_ACCESS_TOKEN=your_access_token
+   
+   # Application Settings
+   MAX_IMAGE_SIZE_MB=10
+   CONCURRENT_UPLOADS=3
+   ```
 
-# Instagram Configuration
-INSTAGRAM_CONFIG = {
-    'business_account_id': 'your_instagram_business_account_id',
-    'access_token': 'your_access_token',
-}
+3. The `.env` file is automatically loaded by `config.py` and is already in `.gitignore` to prevent accidental commits.
+
+**Option B: Using System Environment Variables**
+
+Set environment variables in your shell:
+```bash
+export WORDPRESS_SITE_URL="https://yoursite.wordpress.com"
+export WORDPRESS_USERNAME="your_username"
+export FACEBOOK_PAGE_ID="your_page_id"
+# ... etc
 ```
+
+**Note:** The app will fall back to default placeholder values if no environment variables are set, maintaining backward compatibility.
+
+### 🔒 Security Best Practices
+
+**Important:** Never commit sensitive credentials to version control!
+
+- ✅ Use the `.env` file for local development (already in `.gitignore`)
+- ✅ Use environment variables for production deployment
+- ✅ Rotate API tokens and credentials regularly
+- ✅ Use read-only or limited-scope tokens when possible
+- ✅ For mobile apps, see platform-specific guides in `web/`, `ios/`, and `android/` directories
+- ❌ Never hardcode credentials in `config.py` or any source files
+- ❌ Never commit `.env` files or credentials to Git
 
 ### 4. Run Locally (Desktop Testing)
 
@@ -402,6 +431,38 @@ toolchain create Postboi /path/to/Postboi
 2. Once archived, click **Distribute App**
 3. Follow the App Store submission process
 
+## 🌐 Platform-Specific Starter Templates
+
+Postboi now includes starter templates for web, iOS, and Android platforms to help you get started with native implementations:
+
+### Web Starter (`web/`)
+- HTML/JavaScript starter template with environment variable configuration
+- Example code for loading credentials from `.env`
+- Security best practices for web apps
+- Backend setup guide (Node.js example)
+- See `web/README.md` for detailed setup instructions
+
+### iOS Starter (`ios/`)
+- Swift configuration manager (`PostboiConfig.swift`)
+- Multiple options for credential management (Xcode schemes, Info.plist, Keychain)
+- Security best practices for iOS apps
+- Integration with Kivy-iOS or native Swift development
+- See `ios/README.md` for detailed setup instructions
+
+### Android Starter (`android/`)
+- Kotlin configuration manager (`PostboiConfig.kt`)
+- Gradle build configuration examples
+- Multiple options for credential management (gradle.properties, BuildConfig, EncryptedSharedPreferences)
+- Security best practices for Android apps
+- Integration with Buildozer or native Android Studio development
+- See `android/README.md` for detailed setup instructions
+
+**Key Features:**
+- All templates use environment variables for sensitive data
+- Security-first approach with encrypted storage options
+- Build-time credential injection
+- Compatible with both Kivy and native development approaches
+
 ## 🔧 Troubleshooting
 
 ### Common Errors
@@ -470,9 +531,16 @@ pip install kivy kivymd
 ### Authentication Problems
 
 #### Invalid Credentials
-1. Double-check all credentials in `config.py`
-2. Ensure no extra spaces or special characters
-3. Test connections individually using test scripts
+1. Check your `.env` file or environment variables for correct values
+2. Ensure no extra spaces or special characters in the `.env` file
+3. Verify that `config.py` is loading environment variables correctly
+4. Test connections individually using test scripts
+
+#### Environment Variables Not Loading
+1. Ensure `.env` file is in the repository root directory
+2. Install `python-dotenv`: `pip install python-dotenv`
+3. Check that `.env` file syntax is correct (KEY=value format, no quotes needed)
+4. For mobile builds, see platform-specific guides in `ios/` and `android/` directories
 
 #### Expired Tokens
 1. Facebook/Instagram tokens expire (60 days for long-lived)

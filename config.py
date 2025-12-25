@@ -1,20 +1,31 @@
 """
 Configuration file for Postboi application.
-Copy this file and update with your actual credentials.
+Loads sensitive credentials from environment variables.
+Create a .env file based on .env.template and populate with your credentials.
 """
 
 import os
+from typing import Dict, List
 from typing import Dict, List, Tuple, Optional, Any
 from dotenv import load_dotenv
 
 # Load environment variables from .env file if it exists
 load_dotenv()
 
+# Load environment variables from .env file if it exists
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # python-dotenv not installed, will use system environment variables only
+    pass
+
 # WordPress Configuration
 WORDPRESS_CONFIG: Dict[str, str] = {
     'site_url': os.getenv('WORDPRESS_SITE_URL', 'https://yoursite.wordpress.com'),
     'username': os.getenv('WORDPRESS_USERNAME', 'your_username'),
     'app_password': os.getenv('WORDPRESS_APP_PASSWORD', 'xxxx xxxx xxxx xxxx xxxx xxxx'),
+    'rss_feed_url': (os.getenv('WORDPRESS_SITE_URL', 'https://yoursite.wordpress.com').rstrip('/') + '/feed/'),
     'rss_feed_url': os.getenv('WORDPRESS_RSS_FEED', 'https://yoursite.wordpress.com/feed/'),
 }
 
@@ -33,12 +44,14 @@ INSTAGRAM_CONFIG: Dict[str, str] = {
 }
 
 # Application Settings
+APP_SETTINGS: Dict[str, any] = {
+    'max_image_size_mb': int(os.getenv('MAX_IMAGE_SIZE_MB', '10')),
 APP_SETTINGS: Dict[str, Any] = {
     'max_image_size_mb': 10,  # Maximum image size in MB
     'supported_formats': ['jpg', 'jpeg', 'png', 'webp'],  # Supported image formats
     'thumbnail_size': (300, 300),  # Thumbnail dimensions
     'max_caption_length': 2200,  # Maximum caption length (Instagram limit)
-    'concurrent_uploads': 3,  # Number of concurrent platform uploads
+    'concurrent_uploads': int(os.getenv('CONCURRENT_UPLOADS', '3')),
 }
 
 # Image Filter Presets
