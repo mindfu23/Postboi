@@ -84,12 +84,12 @@ else:
 print("\n7. Example: Complete Workflow (Screenshot → Essay)")
 print("-" * 70)
 
-api_configured = (
+has_valid_api_key = (
     config.ANTHROPIC_CONFIG.get('api_key') and
     config.ANTHROPIC_CONFIG['api_key'] != 'your_anthropic_api_key'
 )
 
-if not api_configured:
+if not has_valid_api_key:
     print("⊘ API not configured - showing mock workflow")
     print("\nWorkflow steps:")
     print("  1. Extract text from screenshot using OCR")
