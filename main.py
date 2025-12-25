@@ -214,6 +214,40 @@ class PostboiApp(MDApp):
         finally:
             Clock.schedule_once(lambda dt: setattr(self, 'is_loading', False), 0)
 
+    def unified_share_to_platforms(self, image_path: str, caption: str, platforms: list):
+        """
+        Share to platforms using unified workflow with retry logic.
+        This method uses the enhanced unified_post_workflow from config.
+        """
+        try:
+            # Import unified workflow function
+            from config import unified_post_workflow, get_unified_workflow_summary
+            
+            # Use unified workflow with retry logic and platform-specific adjustments
+            results = unified_post_workflow(
+                image_path=image_path,
+                caption=caption,
+                platforms=platforms,
+                share_manager=self.share_manager
+            )
+            
+            # Generate detailed summary
+            summary = get_unified_workflow_summary(results)
+            
+            # Show results on main thread
+            Clock.schedule_once(
+                lambda dt: self._on_share_complete(summary),
+                0
+            )
+            
+        except Exception as e:
+            Clock.schedule_once(
+                lambda dt: self.show_error_dialog(f"Error in unified workflow: {str(e)}"),
+                0
+            )
+        finally:
+            Clock.schedule_once(lambda dt: setattr(self, 'is_loading', False), 0)
+
     def _on_share_complete(self, summary: str):
         """Handle share completion on main thread."""
         self.is_loading = False

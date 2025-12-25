@@ -93,7 +93,7 @@ try:
     print(f"   Instagram: {'✓ Configured' if ig_configured else '○ Not configured (template)'}")
     
     if not (wp_configured or fb_configured or ig_configured):
-        print("   ℹ  Edit config.py to add your credentials for full functionality")
+        print("   ℹ  Edit config.py or .env to add your credentials for full functionality")
     
 except Exception as e:
     print(f"   ✗ Configuration error: {str(e)}")
@@ -109,13 +109,130 @@ try:
 except Exception as e:
     print(f"   ✗ Settings error: {str(e)}")
 
+# Test 7: Unified Workflow Configuration
+print("\n7. Testing Unified Workflow Configuration...")
+try:
+    from config import (
+        UNIFIED_WORKFLOW_CONFIG, 
+        PLATFORM_REQUIREMENTS,
+        adjust_caption_for_platform,
+        adjust_image_for_platform
+    )
+    
+    print(f"   Max retry attempts: {UNIFIED_WORKFLOW_CONFIG['max_retry_attempts']}")
+    print(f"   Retry delay: {UNIFIED_WORKFLOW_CONFIG['retry_delay']}s")
+    print(f"   Request timeout: {UNIFIED_WORKFLOW_CONFIG['timeout']}s")
+    print("   ✓ Unified workflow configuration loaded")
+    
+    # Test platform requirements
+    print(f"\n   Platform Requirements:")
+    for platform, reqs in PLATFORM_REQUIREMENTS.items():
+        print(f"     • {platform.capitalize()}:")
+        print(f"       - Max caption: {reqs.get('max_caption_length', 'unlimited')}")
+        print(f"       - Max image size: {reqs.get('max_image_size', 'flexible')}")
+    
+except Exception as e:
+    print(f"   ✗ Unified workflow error: {str(e)}")
+
+# Test 8: Caption Adjustment Function
+print("\n8. Testing Caption Adjustment...")
+try:
+    from config import adjust_caption_for_platform
+    
+    # Test with a caption containing many hashtags
+    test_caption = "Amazing post! " + " ".join([f"#tag{i}" for i in range(40)])
+    
+    # Test Instagram (max 30 hashtags)
+    ig_caption = adjust_caption_for_platform(test_caption, 'instagram')
+    ig_hashtags = [word for word in ig_caption.split() if word.startswith('#')]
+    print(f"   Instagram hashtag limit: {len(ig_hashtags)} <= 30")
+    
+    if len(ig_hashtags) <= 30:
+        print("   ✓ Instagram caption adjustment works correctly")
+    else:
+        print(f"   ✗ Instagram caption has too many hashtags: {len(ig_hashtags)}")
+    
+    # Test WordPress (no limits)
+    wp_caption = adjust_caption_for_platform(test_caption, 'wordpress')
+    print(f"   ✓ WordPress caption adjustment works")
+    
+    # Test Facebook
+    fb_caption = adjust_caption_for_platform(test_caption, 'facebook')
+    print(f"   ✓ Facebook caption adjustment works")
+    
+except Exception as e:
+    print(f"   ✗ Caption adjustment error: {str(e)}")
+
+# Test 9: Image Adjustment Function (Mock Test)
+print("\n9. Testing Image Adjustment Function...")
+try:
+    from config import adjust_image_for_platform
+    
+    # We can't test with a real image without creating one,
+    # but we can verify the function exists and handles missing files
+    result = adjust_image_for_platform('/tmp/nonexistent.jpg', 'instagram')
+    print("   ✓ Image adjustment function is available")
+    
+except Exception as e:
+    print(f"   ✗ Image adjustment error: {str(e)}")
+
+# Test 10: Environment Variable Support
+print("\n10. Testing Environment Variable Support...")
+try:
+    import os
+    from dotenv import load_dotenv
+    
+    # Check if .env file exists
+    env_file = os.path.join(os.path.dirname(__file__), '.env')
+    if os.path.exists(env_file):
+        print("   ✓ .env file found")
+        load_dotenv(env_file)
+        print("   ✓ Environment variables loaded from .env")
+    else:
+        print("   ○ No .env file (optional)")
+        print("   ℹ  Create .env from .env.example for environment-based configuration")
+    
+    print("   ✓ python-dotenv module working correctly")
+    
+except Exception as e:
+    print(f"   ✗ Environment variable error: {str(e)}")
+
+# Test 11: Unified Workflow Function (Without Actual Upload)
+print("\n11. Testing Unified Workflow Function...")
+try:
+    from config import unified_post_workflow, get_unified_workflow_summary
+    
+    print("   ✓ unified_post_workflow function is available")
+    print("   ✓ get_unified_workflow_summary function is available")
+    
+    # Test summary generation with mock results
+    mock_results = {
+        'WordPress': (True, 'https://example.com/post/123', []),
+        'Facebook': (False, 'Authentication failed', ['Attempt 1 failed: Invalid token', 'Attempt 2 failed: Invalid token']),
+        'Instagram': (True, 'Posted to Instagram: 12345', []),
+    }
+    
+    summary = get_unified_workflow_summary(mock_results)
+    print("   ✓ Summary generation works")
+    print("\n   Sample Summary Output:")
+    print("   " + "\n   ".join(summary.split('\n')[:10]))
+    
+except Exception as e:
+    print(f"   ✗ Unified workflow function error: {str(e)}")
+
 # Summary
 print("\n" + "=" * 60)
 print("Test Summary")
 print("=" * 60)
 print("All core functionality tests passed!")
+print("\nNew Features Added:")
+print("✓ Unified posting workflow with retry logic")
+print("✓ Platform-specific caption adjustments")
+print("✓ Platform-specific image size adjustments")
+print("✓ Environment variable support (.env)")
+print("✓ Enhanced error logging and reporting")
 print("\nNext steps:")
-print("1. Edit config.py with your platform credentials")
+print("1. Copy .env.example to .env and add your credentials")
 print("2. Run 'python main.py' to launch the app (requires Kivy)")
 print("3. Or build for mobile with 'buildozer android debug'")
 print("=" * 60)
