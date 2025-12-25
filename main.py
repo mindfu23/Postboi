@@ -413,7 +413,6 @@ class PostboiApp(MDApp):
 
     def _on_essay_draft_complete(self, result: Dict):
         """Handle essay draft completion on main thread."""
-        self.is_loading = False
 
         if not result['success']:
             self.show_error_dialog(f"Essay drafting failed: {result.get('error', 'Unknown error')}")
