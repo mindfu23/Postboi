@@ -6,7 +6,7 @@ Main application entry point.
 import os
 from typing import Dict, Optional, List
 from kivy.app import App
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import StringProperty, BooleanProperty, ListProperty
@@ -17,6 +17,9 @@ from kivymd.uix.button import MDFlatButton, MDRaisedButton
 from kivymd.uix.list import OneLineListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.textfield import MDTextField
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.label import MDLabel
+from kivymd.uix.card import MDCard
 from plyer import filechooser, clipboard
 import threading
 
@@ -25,10 +28,13 @@ from services.wordpress import WordPressService
 from services.facebook_share import FacebookService
 from services.instagram_share import InstagramService
 from services.share_manager import ShareManager
+from services.auth_service import AuthService, AuthResult
+from services.monetization_service import MonetizationService, PurchaseResult
 
 # Import utilities
 from utils.image_utils import ImageUtils
 from utils.filters import ImageFilters
+from utils.settings_manager import SettingsManager
 
 # Import features
 from features.templates import PostTemplates
@@ -48,12 +54,45 @@ class PostboiApp(MDApp):
     selected_platforms = ListProperty([])
     selected_filter = StringProperty('none')
     is_loading = BooleanProperty(False)
+    current_screen = StringProperty('main')
+    
+    # Settings properties for UI binding
+    wp_site_url = StringProperty('')
+    wp_username = StringProperty('')
+    wp_app_password = StringProperty('')
+    fb_page_id = StringProperty('')
+    fb_access_token = StringProperty('')
+    ig_business_id = StringProperty('')
+    ig_access_token = StringProperty('')
+    
+    # Auth properties for UI binding
+    auth_email = StringProperty('')
+    auth_password = StringProperty('')
+    auth_confirm_password = StringProperty('')
+    auth_display_name = StringProperty('')
+    auth_error = StringProperty('')
+    auth_loading = BooleanProperty(False)
+    is_authenticated = BooleanProperty(False)
+    current_user_display = StringProperty('')
+    current_user_email = StringProperty('')
+    
+    # Monetization properties
+    is_premium = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.title = "Postboi"
         self.theme_cls.primary_palette = "Blue"
         self.theme_cls.theme_style = "Light"
+
+        # Auth Service
+        self.auth_service = AuthService()
+        
+        # Monetization Service
+        self.monetization_service = MonetizationService()
+
+        # Settings Manager
+        self.settings_manager = SettingsManager()
 
         # Services
         self.share_manager: Optional[ShareManager] = None
@@ -67,39 +106,81 @@ class PostboiApp(MDApp):
         self.dialog: Optional[MDDialog] = None
         self.filter_menu: Optional[MDDropdownMenu] = None
         self.template_menu: Optional[MDDropdownMenu] = None
+        self.screen_manager: Optional[ScreenManager] = None
+
+        # Check existing auth session
+        self._restore_auth_session()
+
+        # Load saved settings into properties
+        self._load_settings_to_properties()
 
         # Initialize services
         self._init_services()
+    
+    def _restore_auth_session(self):
+        """Restore authentication session if exists."""
+        result, user = self.auth_service.check_auth()
+        if result == AuthResult.SUCCESS and user:
+            self.is_authenticated = True
+            self.current_user_display = user.display_name
+            self.current_user_email = user.email
+            
+            # Link monetization to user
+            self.monetization_service.set_user_id(user.id)
+            self.is_premium = self.monetization_service.is_premium
+            
+            # Link settings to user for per-user credential storage
+            self.settings_manager.set_user(user.id)
+            self._load_settings_to_properties()
+        else:
+            self.is_authenticated = False
+            self.current_user_display = ''
+            self.current_user_email = ''
+
+    def _load_settings_to_properties(self):
+        """Load saved settings into UI properties."""
+        wp = self.settings_manager.get_wordpress_config()
+        self.wp_site_url = wp.get('site_url', '')
+        self.wp_username = wp.get('username', '')
+        self.wp_app_password = wp.get('app_password', '')
+
+        fb = self.settings_manager.get_facebook_config()
+        self.fb_page_id = fb.get('page_id', '')
+        self.fb_access_token = fb.get('access_token', '')
+
+        ig = self.settings_manager.get_instagram_config()
+        self.ig_business_id = ig.get('business_account_id', '')
+        self.ig_access_token = ig.get('access_token', '')
 
     def _init_services(self):
-        """Initialize social media services from configuration."""
+        """Initialize social media services from saved settings."""
         try:
-            # Initialize WordPress
+            # Initialize WordPress from saved settings
             wordpress_service = None
-            if config.WORDPRESS_CONFIG.get('site_url') and \
-               config.WORDPRESS_CONFIG['site_url'] != 'https://yoursite.wordpress.com':
+            if self.settings_manager.is_wordpress_configured():
+                wp = self.settings_manager.get_wordpress_config()
                 wordpress_service = WordPressService(
-                    site_url=config.WORDPRESS_CONFIG['site_url'],
-                    username=config.WORDPRESS_CONFIG['username'],
-                    app_password=config.WORDPRESS_CONFIG['app_password']
+                    site_url=wp['site_url'],
+                    username=wp['username'],
+                    app_password=wp['app_password']
                 )
 
-            # Initialize Facebook
+            # Initialize Facebook from saved settings
             facebook_service = None
-            if config.FACEBOOK_CONFIG.get('page_id') and \
-               config.FACEBOOK_CONFIG['page_id'] != 'your_page_id':
+            if self.settings_manager.is_facebook_configured():
+                fb = self.settings_manager.get_facebook_config()
                 facebook_service = FacebookService(
-                    page_id=config.FACEBOOK_CONFIG['page_id'],
-                    access_token=config.FACEBOOK_CONFIG['access_token']
+                    page_id=fb['page_id'],
+                    access_token=fb['access_token']
                 )
 
-            # Initialize Instagram
+            # Initialize Instagram from saved settings
             instagram_service = None
-            if config.INSTAGRAM_CONFIG.get('business_account_id') and \
-               config.INSTAGRAM_CONFIG['business_account_id'] != 'your_instagram_business_account_id':
+            if self.settings_manager.is_instagram_configured():
+                ig = self.settings_manager.get_instagram_config()
                 instagram_service = InstagramService(
-                    business_account_id=config.INSTAGRAM_CONFIG['business_account_id'],
-                    access_token=config.INSTAGRAM_CONFIG['access_token']
+                    business_account_id=ig['business_account_id'],
+                    access_token=ig['access_token']
                 )
 
             # Initialize ShareManager
@@ -144,6 +225,388 @@ class PostboiApp(MDApp):
     def build(self):
         """Build the application UI."""
         return
+    
+    def on_start(self):
+        """Called when the app starts."""
+        # Determine starting screen based on auth status
+        if self.screen_manager:
+            if self.is_authenticated:
+                self.screen_manager.current = 'main'
+            else:
+                # Check if this is first run or user explicitly logged out
+                if self.settings_manager.is_first_run():
+                    self.screen_manager.current = 'login'
+                else:
+                    # Allow using app without auth
+                    self.screen_manager.current = 'main'
+
+    # =====================
+    # AUTH METHODS
+    # =====================
+    
+    def go_to_login(self):
+        """Navigate to login screen."""
+        self._clear_auth_form()
+        if self.screen_manager:
+            self.screen_manager.transition = SlideTransition(direction='right')
+            self.screen_manager.current = 'login'
+    
+    def go_to_signup(self):
+        """Navigate to signup screen."""
+        self._clear_auth_form()
+        if self.screen_manager:
+            self.screen_manager.transition = SlideTransition(direction='left')
+            self.screen_manager.current = 'signup'
+    
+    def skip_auth(self):
+        """Skip authentication and go to main screen."""
+        if self.screen_manager:
+            self.screen_manager.transition = SlideTransition(direction='left')
+            self.screen_manager.current = 'main'
+    
+    def _clear_auth_form(self):
+        """Clear auth form fields."""
+        self.auth_email = ''
+        self.auth_password = ''
+        self.auth_confirm_password = ''
+        self.auth_display_name = ''
+        self.auth_error = ''
+    
+    def do_login(self):
+        """Perform login."""
+        # Validate
+        if not self.auth_email or not self.auth_password:
+            self.auth_error = "Please fill in all fields"
+            return
+        
+        self.auth_loading = True
+        self.auth_error = ''
+        
+        # Run in background to avoid blocking UI
+        threading.Thread(target=self._perform_login, daemon=True).start()
+    
+    def _perform_login(self):
+        """Perform login in background thread."""
+        result, user = self.auth_service.login(self.auth_email, self.auth_password)
+        
+        # Update UI on main thread
+        Clock.schedule_once(lambda dt: self._on_login_result(result, user), 0)
+    
+    def _on_login_result(self, result: AuthResult, user):
+        """Handle login result on main thread."""
+        self.auth_loading = False
+        
+        if result == AuthResult.SUCCESS and user:
+            self.is_authenticated = True
+            self.current_user_display = user.display_name
+            self.current_user_email = user.email
+            
+            # Link monetization to user
+            self.monetization_service.set_user_id(user.id)
+            self.is_premium = self.monetization_service.is_premium
+            
+            # Link settings to user for per-user credential storage
+            self.settings_manager.set_user(user.id)
+            self._load_settings_to_properties()
+            self._init_services()  # Reinitialize with user's settings
+            
+            # Clear form and go to main
+            self._clear_auth_form()
+            if self.screen_manager:
+                self.screen_manager.transition = SlideTransition(direction='left')
+                self.screen_manager.current = 'main'
+            
+            self.show_info_dialog(f"Welcome back, {user.display_name}!")
+        else:
+            error_messages = {
+                AuthResult.USER_NOT_FOUND: "Account not found",
+                AuthResult.INVALID_CREDENTIALS: "Invalid email or password",
+                AuthResult.INVALID_EMAIL: "Invalid email address",
+                AuthResult.ERROR: "An error occurred. Please try again.",
+            }
+            self.auth_error = error_messages.get(result, "Login failed")
+    
+    def do_signup(self):
+        """Perform signup."""
+        # Validate
+        if not self.auth_email or not self.auth_password:
+            self.auth_error = "Please fill in all fields"
+            return
+        
+        if len(self.auth_password) < 6:
+            self.auth_error = "Password must be at least 6 characters"
+            return
+        
+        if self.auth_password != self.auth_confirm_password:
+            self.auth_error = "Passwords do not match"
+            return
+        
+        self.auth_loading = True
+        self.auth_error = ''
+        
+        # Run in background
+        threading.Thread(target=self._perform_signup, daemon=True).start()
+    
+    def _perform_signup(self):
+        """Perform signup in background thread."""
+        result, user = self.auth_service.signup(
+            self.auth_email, 
+            self.auth_password, 
+            self.auth_display_name or self.auth_email.split('@')[0]
+        )
+        
+        # Update UI on main thread
+        Clock.schedule_once(lambda dt: self._on_signup_result(result, user), 0)
+    
+    def _on_signup_result(self, result: AuthResult, user):
+        """Handle signup result on main thread."""
+        self.auth_loading = False
+        
+        if result == AuthResult.SUCCESS and user:
+            self.is_authenticated = True
+            self.current_user_display = user.display_name
+            self.current_user_email = user.email
+            
+            # Link monetization to user
+            self.monetization_service.set_user_id(user.id)
+            self.is_premium = self.monetization_service.is_premium
+            
+            # Link settings to user for per-user credential storage
+            self.settings_manager.set_user(user.id)
+            # New user starts with empty settings
+            self._load_settings_to_properties()
+            
+            # Clear form and go to main
+            self._clear_auth_form()
+            if self.screen_manager:
+                self.screen_manager.transition = SlideTransition(direction='left')
+                self.screen_manager.current = 'main'
+            
+            self.show_info_dialog(f"Welcome, {user.display_name}! Your account has been created.")
+        else:
+            error_messages = {
+                AuthResult.USER_EXISTS: "An account with this email already exists",
+                AuthResult.INVALID_EMAIL: "Invalid email address",
+                AuthResult.WEAK_PASSWORD: "Password must be at least 6 characters",
+                AuthResult.ERROR: "An error occurred. Please try again.",
+            }
+            self.auth_error = error_messages.get(result, "Signup failed")
+    
+    def do_logout(self):
+        """Log out current user."""
+        self.auth_service.logout()
+        self.is_authenticated = False
+        self.current_user_display = ''
+        self.current_user_email = ''
+        self.is_premium = False
+        
+        # Reset to default settings (not user-specific)
+        self.settings_manager.set_user(None)
+        self._load_settings_to_properties()
+        self._init_services()
+        
+        self.show_info_dialog("You have been signed out.")
+    
+    def open_account(self):
+        """Open account management (settings screen)."""
+        self.open_settings()
+    
+    def confirm_delete_account(self):
+        """Show delete account confirmation dialog."""
+        if self.dialog:
+            self.dialog.dismiss()
+        
+        self.dialog = MDDialog(
+            title="Delete Account",
+            text="Are you sure you want to delete your account? This action cannot be undone.",
+            buttons=[
+                MDFlatButton(
+                    text="Cancel",
+                    on_release=lambda x: self.dialog.dismiss()
+                ),
+                MDRaisedButton(
+                    text="Delete",
+                    md_bg_color=(0.9, 0.2, 0.2, 1),
+                    on_release=lambda x: self._do_delete_account()
+                )
+            ],
+        )
+        self.dialog.open()
+    
+    def _do_delete_account(self):
+        """Execute account deletion."""
+        if self.dialog:
+            self.dialog.dismiss()
+        
+        # For simplicity, just logout. In production, you'd verify password
+        result = self.auth_service.logout()
+        self.is_authenticated = False
+        self.current_user_display = ''
+        self.current_user_email = ''
+        self.is_premium = False
+        
+        if self.screen_manager:
+            self.screen_manager.transition = SlideTransition(direction='right')
+            self.screen_manager.current = 'login'
+        
+        self.show_info_dialog("Your account has been deleted.")
+
+    # =====================
+    # PREMIUM/MONETIZATION METHODS
+    # =====================
+    
+    def open_premium(self):
+        """Open premium/subscription screen."""
+        if self.screen_manager:
+            self.screen_manager.transition = SlideTransition(direction='left')
+            self.screen_manager.current = 'premium'
+    
+    def close_premium(self):
+        """Close premium screen and return to main."""
+        if self.screen_manager:
+            self.screen_manager.transition = SlideTransition(direction='right')
+            self.screen_manager.current = 'main'
+    
+    def purchase_product(self, product_id: str):
+        """Purchase a product."""
+        result = self.monetization_service.purchase(product_id)
+        
+        if result == PurchaseResult.SUCCESS:
+            self.is_premium = self.monetization_service.is_premium
+            self.show_info_dialog("Purchase successful! Thank you for upgrading to Premium.")
+        elif result == PurchaseResult.ALREADY_OWNED:
+            self.show_info_dialog("You already own this product.")
+        elif result == PurchaseResult.CANCELLED:
+            self.show_info_dialog("Purchase cancelled.")
+        else:
+            self.show_error_dialog("Purchase failed. Please try again.")
+    
+    def restore_purchases(self):
+        """Restore previous purchases."""
+        restored = self.monetization_service.restore_purchases()
+        self.is_premium = self.monetization_service.is_premium
+        
+        if restored:
+            self.show_info_dialog(f"Restored {len(restored)} purchase(s).")
+        else:
+            self.show_info_dialog("No purchases to restore.")
+
+    # =====================
+    # SETTINGS SCREEN METHODS
+    # =====================
+
+    def open_settings(self):
+        """Open the settings screen."""
+        if self.screen_manager:
+            self.screen_manager.transition = SlideTransition(direction='left')
+            self.screen_manager.current = 'settings'
+
+    def close_settings(self):
+        """Close settings and return to main screen."""
+        if self.screen_manager:
+            self.screen_manager.transition = SlideTransition(direction='right')
+            self.screen_manager.current = 'main'
+
+    def save_wordpress_settings(self):
+        """Save WordPress credentials."""
+        self.settings_manager.set_wordpress_config(
+            site_url=self.wp_site_url,
+            username=self.wp_username,
+            app_password=self.wp_app_password
+        )
+        self._init_services()  # Reinitialize services
+        self.show_info_dialog("WordPress settings saved!")
+
+    def save_facebook_settings(self):
+        """Save Facebook credentials."""
+        self.settings_manager.set_facebook_config(
+            app_id='',  # Optional for basic posting
+            app_secret='',  # Optional for basic posting
+            access_token=self.fb_access_token,
+            page_id=self.fb_page_id
+        )
+        self._init_services()  # Reinitialize services
+        self.show_info_dialog("Facebook settings saved!")
+
+    def save_instagram_settings(self):
+        """Save Instagram credentials."""
+        self.settings_manager.set_instagram_config(
+            business_account_id=self.ig_business_id,
+            access_token=self.ig_access_token
+        )
+        self._init_services()  # Reinitialize services
+        self.show_info_dialog("Instagram settings saved!")
+
+    def save_all_settings(self):
+        """Save all platform settings at once."""
+        # Save WordPress
+        self.settings_manager.set_wordpress_config(
+            site_url=self.wp_site_url,
+            username=self.wp_username,
+            app_password=self.wp_app_password
+        )
+        
+        # Save Facebook
+        self.settings_manager.set_facebook_config(
+            app_id='',
+            app_secret='',
+            access_token=self.fb_access_token,
+            page_id=self.fb_page_id
+        )
+        
+        # Save Instagram
+        self.settings_manager.set_instagram_config(
+            business_account_id=self.ig_business_id,
+            access_token=self.ig_access_token
+        )
+        
+        # Reinitialize services with new credentials
+        self._init_services()
+        
+        # Mark first run complete
+        if self.settings_manager.is_first_run():
+            self.settings_manager.mark_first_run_complete()
+        
+        self.show_info_dialog("All settings saved successfully!")
+        self.close_settings()
+
+    def clear_all_settings(self):
+        """Clear all saved credentials."""
+        self.settings_manager.clear_all_credentials()
+        self._load_settings_to_properties()
+        self._init_services()
+        self.show_info_dialog("All credentials cleared.")
+
+    def test_wordpress_connection(self):
+        """Test WordPress connection with current credentials."""
+        if not self.wp_site_url or not self.wp_username or not self.wp_app_password:
+            self.show_error_dialog("Please fill in all WordPress fields first.")
+            return
+        
+        try:
+            test_service = WordPressService(
+                site_url=self.wp_site_url,
+                username=self.wp_username,
+                app_password=self.wp_app_password
+            )
+            # Try to get user info as a connection test
+            success, message = test_service.test_connection()
+            if success:
+                self.show_info_dialog("✓ WordPress connection successful!")
+            else:
+                self.show_error_dialog(f"WordPress connection failed: {message}")
+        except Exception as e:
+            self.show_error_dialog(f"WordPress error: {str(e)}")
+
+    def get_platform_status(self, platform: str) -> str:
+        """Get configuration status for a platform."""
+        if platform == 'wordpress':
+            return "✓ Configured" if self.settings_manager.is_wordpress_configured() else "Not configured"
+        elif platform == 'facebook':
+            return "✓ Configured" if self.settings_manager.is_facebook_configured() else "Not configured"
+        elif platform == 'instagram':
+            return "✓ Configured" if self.settings_manager.is_instagram_configured() else "Not configured"
+        return "Unknown"
 
     def on_select_image(self):
         """Handle image selection from device."""

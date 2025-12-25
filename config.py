@@ -4,7 +4,8 @@ Loads sensitive credentials from environment variables.
 Create a .env file based on .env.template and populate with your credentials.
 """
 
-from typing import Any, Dict, List
+import os
+from typing import Any, Dict, List, Optional, Tuple
 
 # Placeholder values for API keys
 PLACEHOLDER_ANTHROPIC_API_KEY = 'your_anthropic_api_key'
