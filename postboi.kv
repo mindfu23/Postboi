@@ -2,6 +2,7 @@
 # Material Design interface for cross-platform social sharing
 
 #:import MDRaisedButton kivymd.uix.button.MDRaisedButton
+#:import MDFlatButton kivymd.uix.button.MDFlatButton
 #:import MDTextField kivymd.uix.textfield.MDTextField
 #:import MDCheckbox kivymd.uix.selectioncontrol.MDCheckbox
 #:import MDSpinner kivymd.uix.spinner.MDSpinner
@@ -9,145 +10,673 @@
 #:import MDLabel kivymd.uix.label.MDLabel
 #:import MDIconButton kivymd.uix.button.MDIconButton
 #:import MDChip kivymd.uix.chip.MDChip
+#:import ScreenManager kivy.uix.screenmanager.ScreenManager
+#:import Screen kivy.uix.screenmanager.Screen
 #:import os os
 
 <PostboiApp>:
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(16)
-        spacing: dp(16)
+    screen_manager: screen_manager
 
-        # Header
-        MDLabel:
-            text: "Postboi"
-            font_style: "H4"
-            halign: "center"
-            size_hint_y: None
-            height: dp(60)
+    ScreenManager:
+        id: screen_manager
 
-        # Scrollable content
-        ScrollView:
-            do_scroll_x: False
+        # Login Screen
+        Screen:
+            name: 'login'
 
             BoxLayout:
                 orientation: 'vertical'
+                padding: dp(32)
                 spacing: dp(16)
-                size_hint_y: None
-                height: self.minimum_height
-                padding: [0, 0, 0, dp(16)]
 
-                # Image Selection Card
+                Widget:
+                    size_hint_y: 0.1
+
+                # Logo/Title Area
+                MDLabel:
+                    text: "Postboi"
+                    font_style: "H3"
+                    halign: "center"
+                    size_hint_y: None
+                    height: dp(60)
+
+                MDLabel:
+                    text: "Cross-Platform Social Sharing"
+                    halign: "center"
+                    size_hint_y: None
+                    height: dp(30)
+                    theme_text_color: "Secondary"
+
+                Widget:
+                    size_hint_y: 0.05
+
+                # Login Card
                 MDCard:
                     orientation: 'vertical'
-                    padding: dp(16)
-                    spacing: dp(12)
+                    padding: dp(24)
+                    spacing: dp(16)
                     size_hint_y: None
-                    height: dp(200)
-                    elevation: 2
+                    height: dp(380)
+                    elevation: 4
 
                     MDLabel:
-                        text: "Select Image"
-                        font_style: "H6"
+                        text: "Sign In"
+                        font_style: "H5"
+                        halign: "center"
+                        size_hint_y: None
+                        height: dp(40)
+
+                    MDTextField:
+                        id: login_email
+                        hint_text: "Email"
+                        text: app.auth_email
+                        on_text: app.auth_email = self.text
+                        size_hint_y: None
+                        height: dp(48)
+                        mode: "rectangle"
+                        helper_text: "Enter your email address"
+                        helper_text_mode: "on_focus"
+
+                    MDTextField:
+                        id: login_password
+                        hint_text: "Password"
+                        text: app.auth_password
+                        on_text: app.auth_password = self.text
+                        password: True
+                        size_hint_y: None
+                        height: dp(48)
+                        mode: "rectangle"
+
+                    MDLabel:
+                        id: login_error
+                        text: app.auth_error
+                        halign: "center"
                         size_hint_y: None
                         height: dp(30)
+                        theme_text_color: "Custom"
+                        text_color: (0.9, 0.2, 0.2, 1)
+                        opacity: 1 if app.auth_error else 0
+
+                    MDRaisedButton:
+                        text: "Sign In"
+                        pos_hint: {'center_x': 0.5}
+                        size_hint: (0.8, None)
+                        height: dp(48)
+                        md_bg_color: app.theme_cls.primary_color
+                        on_release: app.do_login()
+                        disabled: app.auth_loading
+
+                    MDSpinner:
+                        size_hint: None, None
+                        size: dp(30), dp(30)
+                        pos_hint: {'center_x': 0.5}
+                        active: app.auth_loading
+                        opacity: 1 if app.auth_loading else 0
 
                     BoxLayout:
                         orientation: 'horizontal'
-                        spacing: dp(12)
                         size_hint_y: None
-                        height: dp(50)
-
-                        MDRaisedButton:
-                            text: "Choose Image"
-                            on_release: app.on_select_image()
-                            size_hint_x: 0.6
+                        height: dp(30)
 
                         MDLabel:
-                            text: "No image selected" if not app.selected_image else os.path.basename(app.selected_image)
-                            size_hint_x: 0.4
-                            font_size: sp(12)
+                            text: "Don't have an account?"
+                            halign: "right"
+                            size_hint_x: 0.55
 
-                    # Image preview placeholder
-                    BoxLayout:
-                        size_hint_y: None
-                        height: dp(80)
+                        MDFlatButton:
+                            text: "Sign Up"
+                            size_hint_x: 0.45
+                            on_release: app.go_to_signup()
 
-                        AsyncImage:
-                            source: app.selected_image if app.selected_image else ''
-                            size_hint: (None, None)
-                            size: (dp(80), dp(80))
-                            pos_hint: {'center_x': 0.5}
-                            allow_stretch: True
-                            keep_ratio: True
+                # Skip Login Option
+                MDFlatButton:
+                    text: "Continue without account"
+                    pos_hint: {'center_x': 0.5}
+                    on_release: app.skip_auth()
 
-                # Filter Selection Card
+                Widget:
+                    size_hint_y: 0.15
+
+        # Signup Screen
+        Screen:
+            name: 'signup'
+
+            BoxLayout:
+                orientation: 'vertical'
+                padding: dp(32)
+                spacing: dp(16)
+
+                Widget:
+                    size_hint_y: 0.05
+
+                # Logo/Title Area
+                MDLabel:
+                    text: "Create Account"
+                    font_style: "H4"
+                    halign: "center"
+                    size_hint_y: None
+                    height: dp(50)
+
+                # Signup Card
                 MDCard:
                     orientation: 'vertical'
-                    padding: dp(16)
+                    padding: dp(24)
                     spacing: dp(12)
                     size_hint_y: None
-                    height: dp(140)
-                    elevation: 2
+                    height: dp(480)
+                    elevation: 4
+
+                    MDTextField:
+                        id: signup_display_name
+                        hint_text: "Display Name"
+                        text: app.auth_display_name
+                        on_text: app.auth_display_name = self.text
+                        size_hint_y: None
+                        height: dp(48)
+                        mode: "rectangle"
+
+                    MDTextField:
+                        id: signup_email
+                        hint_text: "Email"
+                        text: app.auth_email
+                        on_text: app.auth_email = self.text
+                        size_hint_y: None
+                        height: dp(48)
+                        mode: "rectangle"
+
+                    MDTextField:
+                        id: signup_password
+                        hint_text: "Password (min 6 characters)"
+                        text: app.auth_password
+                        on_text: app.auth_password = self.text
+                        password: True
+                        size_hint_y: None
+                        height: dp(48)
+                        mode: "rectangle"
+
+                    MDTextField:
+                        id: signup_confirm_password
+                        hint_text: "Confirm Password"
+                        text: app.auth_confirm_password
+                        on_text: app.auth_confirm_password = self.text
+                        password: True
+                        size_hint_y: None
+                        height: dp(48)
+                        mode: "rectangle"
 
                     MDLabel:
-                        text: "Image Filter"
-                        font_style: "H6"
+                        id: signup_error
+                        text: app.auth_error
+                        halign: "center"
                         size_hint_y: None
                         height: dp(30)
+                        theme_text_color: "Custom"
+                        text_color: (0.9, 0.2, 0.2, 1)
+                        opacity: 1 if app.auth_error else 0
 
-                    MDLabel:
-                        text: "Selected: " + app.selected_filter
-                        size_hint_y: None
-                        height: dp(25)
-                        font_size: sp(14)
+                    MDRaisedButton:
+                        text: "Create Account"
+                        pos_hint: {'center_x': 0.5}
+                        size_hint: (0.8, None)
+                        height: dp(48)
+                        md_bg_color: app.theme_cls.primary_color
+                        on_release: app.do_signup()
+                        disabled: app.auth_loading
 
-                    ScrollView:
-                        size_hint_y: None
-                        height: dp(50)
-                        do_scroll_y: False
-
-                        BoxLayout:
-                            orientation: 'horizontal'
-                            spacing: dp(8)
-                            size_hint_x: None
-                            width: self.minimum_width
-                            padding: [dp(4), 0]
-
-                            MDChip:
-                                text: "None"
-                                on_release: app.on_filter_select('none')
-
-                            MDChip:
-                                text: "Grayscale"
-                                on_release: app.on_filter_select('grayscale')
-
-                            MDChip:
-                                text: "Sepia"
-                                on_release: app.on_filter_select('sepia')
-
-                            MDChip:
-                                text: "Vintage"
-                                on_release: app.on_filter_select('vintage')
-
-                            MDChip:
-                                text: "Bright"
-                                on_release: app.on_filter_select('bright')
-
-                            MDChip:
-                                text: "Sharpen"
-                                on_release: app.on_filter_select('sharpen')
-
-                # Caption Card
-                MDCard:
-                    orientation: 'vertical'
-                    padding: dp(16)
-                    spacing: dp(12)
-                    size_hint_y: None
-                    height: dp(220)
-                    elevation: 2
+                    MDSpinner:
+                        size_hint: None, None
+                        size: dp(30), dp(30)
+                        pos_hint: {'center_x': 0.5}
+                        active: app.auth_loading
+                        opacity: 1 if app.auth_loading else 0
 
                     BoxLayout:
                         orientation: 'horizontal'
+                        size_hint_y: None
+                        height: dp(30)
+
+                        MDLabel:
+                            text: "Already have an account?"
+                            halign: "right"
+                            size_hint_x: 0.6
+
+                        MDFlatButton:
+                            text: "Sign In"
+                            size_hint_x: 0.4
+                            on_release: app.go_to_login()
+
+                Widget:
+                    size_hint_y: 0.1
+
+        # Premium/Subscription Screen
+        Screen:
+            name: 'premium'
+
+            BoxLayout:
+                orientation: 'vertical'
+                padding: dp(16)
+                spacing: dp(12)
+
+                # Header
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: dp(60)
+
+                    MDIconButton:
+                        icon: "arrow-left"
+                        pos_hint: {'center_y': 0.5}
+                        on_release: app.close_premium()
+
+                    MDLabel:
+                        text: "Go Premium"
+                        font_style: "H5"
+                        halign: "center"
+                        size_hint_x: 0.8
+
+                    Widget:
+                        size_hint_x: None
+                        width: dp(48)
+
+                # Current Status
+                MDCard:
+                    orientation: 'vertical'
+                    padding: dp(16)
+                    spacing: dp(8)
+                    size_hint_y: None
+                    height: dp(100)
+                    elevation: 2
+                    md_bg_color: (0.9, 0.95, 1, 1) if not app.is_premium else (0.9, 1, 0.9, 1)
+
+                    MDLabel:
+                        text: "Premium" if app.is_premium else "Free Plan"
+                        font_style: "H6"
+                        halign: "center"
+
+                    MDLabel:
+                        text: "You have access to all premium features!" if app.is_premium else "Upgrade to unlock all features and remove ads"
+                        halign: "center"
+                        size_hint_y: None
+                        height: dp(40)
+
+                # Premium Features
+                ScrollView:
+                    do_scroll_x: False
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: dp(12)
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: [0, dp(8), 0, dp(16)]
+
+                        MDLabel:
+                            text: "Premium Features"
+                            font_style: "H6"
+                            size_hint_y: None
+                            height: dp(30)
+
+                        # Feature List
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(8)
+                            size_hint_y: None
+                            height: dp(200)
+                            elevation: 1
+
+                            BoxLayout:
+                                size_hint_y: None
+                                height: dp(30)
+                                MDLabel:
+                                    text: "✓ Remove all ads"
+                                    theme_text_color: "Custom"
+                                    text_color: (0.2, 0.6, 0.2, 1)
+
+                            BoxLayout:
+                                size_hint_y: None
+                                height: dp(30)
+                                MDLabel:
+                                    text: "✓ Unlimited scheduled posts"
+                                    theme_text_color: "Custom"
+                                    text_color: (0.2, 0.6, 0.2, 1)
+
+                            BoxLayout:
+                                size_hint_y: None
+                                height: dp(30)
+                                MDLabel:
+                                    text: "✓ Advanced analytics"
+                                    theme_text_color: "Custom"
+                                    text_color: (0.2, 0.6, 0.2, 1)
+
+                            BoxLayout:
+                                size_hint_y: None
+                                height: dp(30)
+                                MDLabel:
+                                    text: "✓ Priority support"
+                                    theme_text_color: "Custom"
+                                    text_color: (0.2, 0.6, 0.2, 1)
+
+                            BoxLayout:
+                                size_hint_y: None
+                                height: dp(30)
+                                MDLabel:
+                                    text: "✓ Multi-account support"
+                                    theme_text_color: "Custom"
+                                    text_color: (0.2, 0.6, 0.2, 1)
+
+                        # Purchase Options
+                        MDLabel:
+                            text: "Choose Your Plan"
+                            font_style: "H6"
+                            size_hint_y: None
+                            height: dp(30)
+
+                        # One-Time Purchase
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(8)
+                            size_hint_y: None
+                            height: dp(120)
+                            elevation: 2
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                size_hint_y: None
+                                height: dp(30)
+
+                                MDLabel:
+                                    text: "Lifetime Premium"
+                                    font_style: "Subtitle1"
+                                    bold: True
+                                    size_hint_x: 0.7
+
+                                MDLabel:
+                                    text: "$4.99"
+                                    font_style: "H6"
+                                    halign: "right"
+                                    size_hint_x: 0.3
+
+                            MDLabel:
+                                text: "One-time purchase, lifetime access"
+                                size_hint_y: None
+                                height: dp(25)
+                                theme_text_color: "Secondary"
+
+                            MDRaisedButton:
+                                text: "Purchase"
+                                pos_hint: {'center_x': 0.5}
+                                size_hint_x: 0.6
+                                on_release: app.purchase_product('postboi_premium')
+                                disabled: app.is_premium
+
+                        # Monthly Subscription
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(8)
+                            size_hint_y: None
+                            height: dp(120)
+                            elevation: 2
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                size_hint_y: None
+                                height: dp(30)
+
+                                MDLabel:
+                                    text: "Monthly Premium"
+                                    font_style: "Subtitle1"
+                                    bold: True
+                                    size_hint_x: 0.7
+
+                                MDLabel:
+                                    text: "$1.99/mo"
+                                    font_style: "H6"
+                                    halign: "right"
+                                    size_hint_x: 0.3
+
+                            MDLabel:
+                                text: "Cancel anytime"
+                                size_hint_y: None
+                                height: dp(25)
+                                theme_text_color: "Secondary"
+
+                            MDRaisedButton:
+                                text: "Subscribe"
+                                pos_hint: {'center_x': 0.5}
+                                size_hint_x: 0.6
+                                on_release: app.purchase_product('postboi_premium_monthly')
+                                disabled: app.is_premium
+
+                        # Yearly Subscription
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(8)
+                            size_hint_y: None
+                            height: dp(130)
+                            elevation: 2
+                            md_bg_color: (1, 0.98, 0.9, 1)
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                size_hint_y: None
+                                height: dp(30)
+
+                                MDLabel:
+                                    text: "Yearly Premium"
+                                    font_style: "Subtitle1"
+                                    bold: True
+                                    size_hint_x: 0.5
+
+                                MDLabel:
+                                    text: "BEST VALUE"
+                                    font_size: sp(10)
+                                    halign: "center"
+                                    size_hint_x: 0.25
+                                    theme_text_color: "Custom"
+                                    text_color: (0.9, 0.5, 0, 1)
+
+                                MDLabel:
+                                    text: "$15.99/yr"
+                                    font_style: "H6"
+                                    halign: "right"
+                                    size_hint_x: 0.25
+
+                            MDLabel:
+                                text: "Save 33% vs monthly"
+                                size_hint_y: None
+                                height: dp(25)
+                                theme_text_color: "Secondary"
+
+                            MDRaisedButton:
+                                text: "Subscribe"
+                                pos_hint: {'center_x': 0.5}
+                                size_hint_x: 0.6
+                                md_bg_color: (0.9, 0.5, 0, 1)
+                                on_release: app.purchase_product('postboi_premium_yearly')
+                                disabled: app.is_premium
+
+                        # Restore Purchases
+                        MDFlatButton:
+                            text: "Restore Purchases"
+                            pos_hint: {'center_x': 0.5}
+                            on_release: app.restore_purchases()
+
+        # Main Screen
+        Screen:
+            name: 'main'
+
+            BoxLayout:
+                orientation: 'vertical'
+                padding: dp(16)
+                spacing: dp(16)
+
+                # Header with User Info and Settings Button
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: dp(60)
+
+                    # User Avatar/Account Button
+                    MDIconButton:
+                        icon: "account-circle"
+                        pos_hint: {'center_y': 0.5}
+                        on_release: app.open_premium() if not app.is_authenticated else app.open_account()
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        size_hint_x: 0.6
+
+                        MDLabel:
+                            text: "Postboi"
+                            font_style: "H5"
+                            halign: "center"
+
+                        MDLabel:
+                            text: app.current_user_display if app.is_authenticated else "Not signed in"
+                            halign: "center"
+                            font_size: sp(12)
+                            theme_text_color: "Secondary"
+
+                    # Premium Badge (if premium)
+                    MDIconButton:
+                        icon: "star" if app.is_premium else "star-outline"
+                        pos_hint: {'center_y': 0.5}
+                        theme_icon_color: "Custom"
+                        icon_color: (1, 0.8, 0, 1) if app.is_premium else (0.5, 0.5, 0.5, 1)
+                        on_release: app.open_premium()
+
+                    MDIconButton:
+                        icon: "cog"
+                        pos_hint: {'center_y': 0.5}
+                        on_release: app.open_settings()
+
+                # Scrollable content
+                ScrollView:
+                    do_scroll_x: False
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: dp(16)
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: [0, 0, 0, dp(16)]
+
+                        # Image Selection Card
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(12)
+                            size_hint_y: None
+                            height: dp(200)
+                            elevation: 2
+
+                            MDLabel:
+                                text: "Select Image"
+                                font_style: "H6"
+                                size_hint_y: None
+                                height: dp(30)
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                spacing: dp(12)
+                                size_hint_y: None
+                                height: dp(50)
+
+                                MDRaisedButton:
+                                    text: "Choose Image"
+                                    on_release: app.on_select_image()
+                                    size_hint_x: 0.6
+
+                                MDLabel:
+                                    text: "No image selected" if not app.selected_image else os.path.basename(app.selected_image)
+                                    size_hint_x: 0.4
+                                    font_size: sp(12)
+
+                            # Image preview placeholder
+                            BoxLayout:
+                                size_hint_y: None
+                                height: dp(80)
+
+                                AsyncImage:
+                                    source: app.selected_image if app.selected_image else ''
+                                    size_hint: (None, None)
+                                    size: (dp(80), dp(80))
+                                    pos_hint: {'center_x': 0.5}
+                                    allow_stretch: True
+                                    keep_ratio: True
+
+                        # Filter Selection Card
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(12)
+                            size_hint_y: None
+                            height: dp(140)
+                            elevation: 2
+
+                            MDLabel:
+                                text: "Image Filter"
+                                font_style: "H6"
+                                size_hint_y: None
+                                height: dp(30)
+
+                            MDLabel:
+                                text: "Selected: " + app.selected_filter
+                                size_hint_y: None
+                                height: dp(25)
+                                font_size: sp(14)
+
+                            ScrollView:
+                                size_hint_y: None
+                                height: dp(50)
+                                do_scroll_y: False
+
+                                BoxLayout:
+                                    orientation: 'horizontal'
+                                    spacing: dp(8)
+                                    size_hint_x: None
+                                    width: self.minimum_width
+                                    padding: [dp(4), 0]
+
+                                    MDChip:
+                                        text: "None"
+                                        on_release: app.on_filter_select('none')
+
+                                    MDChip:
+                                        text: "Grayscale"
+                                        on_release: app.on_filter_select('grayscale')
+
+                                    MDChip:
+                                        text: "Sepia"
+                                        on_release: app.on_filter_select('sepia')
+
+                                    MDChip:
+                                        text: "Vintage"
+                                        on_release: app.on_filter_select('vintage')
+
+                                    MDChip:
+                                        text: "Bright"
+                                        on_release: app.on_filter_select('bright')
+
+                                    MDChip:
+                                        text: "Sharpen"
+                                        on_release: app.on_filter_select('sharpen')
+
+                        # Caption Card
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(12)
+                            size_hint_y: None
+                            height: dp(220)
+                            elevation: 2
+
+                            BoxLayout:
+                                orientation: 'horizontal'
                         size_hint_y: None
                         height: dp(30)
 
@@ -244,10 +773,296 @@
                     on_release: app.on_share_button()
                     disabled: app.is_loading
 
-        # Loading Indicator
-        MDSpinner:
-            size_hint: None, None
-            size: dp(46), dp(46)
-            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-            active: app.is_loading
-            opacity: 1 if app.is_loading else 0
+                # Loading Indicator
+                MDSpinner:
+                    size_hint: None, None
+                    size: dp(46), dp(46)
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    active: app.is_loading
+                    opacity: 1 if app.is_loading else 0
+
+        # Settings Screen
+        Screen:
+            name: 'settings'
+
+            BoxLayout:
+                orientation: 'vertical'
+                padding: dp(16)
+                spacing: dp(8)
+
+                # Settings Header
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: dp(60)
+
+                    MDIconButton:
+                        icon: "arrow-left"
+                        pos_hint: {'center_y': 0.5}
+                        on_release: app.close_settings()
+
+                    MDLabel:
+                        text: "Settings"
+                        font_style: "H5"
+                        halign: "center"
+                        size_hint_x: 0.8
+
+                    Widget:
+                        size_hint_x: None
+                        width: dp(48)
+
+                # Settings Content
+                ScrollView:
+                    do_scroll_x: False
+
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: dp(16)
+                        size_hint_y: None
+                        height: self.minimum_height
+                        padding: [0, 0, 0, dp(16)]
+
+                        # Account Settings Card
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(8)
+                            size_hint_y: None
+                            height: dp(180)
+                            elevation: 2
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                size_hint_y: None
+                                height: dp(30)
+
+                                MDLabel:
+                                    text: "Account"
+                                    font_style: "H6"
+                                    size_hint_x: 0.5
+
+                                MDLabel:
+                                    text: "Premium" if app.is_premium else "Free"
+                                    font_size: sp(12)
+                                    halign: "right"
+                                    theme_text_color: "Custom"
+                                    text_color: (0, 0.7, 0, 1) if app.is_premium else (0.5, 0.5, 0.5, 1)
+
+                            MDLabel:
+                                text: app.current_user_email if app.is_authenticated else "Not signed in"
+                                size_hint_y: None
+                                height: dp(25)
+                                theme_text_color: "Secondary"
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                spacing: dp(8)
+                                size_hint_y: None
+                                height: dp(45)
+
+                                MDRaisedButton:
+                                    text: "Upgrade" if not app.is_premium else "Manage"
+                                    size_hint_x: 0.5
+                                    on_release: app.open_premium()
+
+                                MDRaisedButton:
+                                    text: "Sign Out" if app.is_authenticated else "Sign In"
+                                    size_hint_x: 0.5
+                                    on_release: app.do_logout() if app.is_authenticated else app.go_to_login()
+
+                            MDFlatButton:
+                                text: "Delete Account"
+                                pos_hint: {'center_x': 0.5}
+                                theme_text_color: "Custom"
+                                text_color: (0.8, 0.2, 0.2, 1)
+                                on_release: app.confirm_delete_account()
+                                opacity: 1 if app.is_authenticated else 0
+                                disabled: not app.is_authenticated
+
+                        # WordPress Settings Card
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(8)
+                            size_hint_y: None
+                            height: dp(280)
+                            elevation: 2
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                size_hint_y: None
+                                height: dp(30)
+
+                                MDLabel:
+                                    text: "WordPress"
+                                    font_style: "H6"
+                                    size_hint_x: 0.7
+
+                                MDLabel:
+                                    text: app.get_platform_status('wordpress')
+                                    font_size: sp(12)
+                                    halign: "right"
+                                    theme_text_color: "Custom"
+                                    text_color: (0, 0.7, 0, 1) if "Configured" in app.get_platform_status('wordpress') else (0.7, 0, 0, 1)
+
+                            MDTextField:
+                                hint_text: "Site URL (e.g., https://yoursite.wordpress.com)"
+                                text: app.wp_site_url
+                                on_text: app.wp_site_url = self.text
+                                size_hint_y: None
+                                height: dp(48)
+                                mode: "rectangle"
+
+                            MDTextField:
+                                hint_text: "Username"
+                                text: app.wp_username
+                                on_text: app.wp_username = self.text
+                                size_hint_y: None
+                                height: dp(48)
+                                mode: "rectangle"
+
+                            MDTextField:
+                                hint_text: "Application Password"
+                                text: app.wp_app_password
+                                on_text: app.wp_app_password = self.text
+                                password: True
+                                size_hint_y: None
+                                height: dp(48)
+                                mode: "rectangle"
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                spacing: dp(8)
+                                size_hint_y: None
+                                height: dp(40)
+
+                                MDRaisedButton:
+                                    text: "Test Connection"
+                                    size_hint_x: 0.5
+                                    on_release: app.test_wordpress_connection()
+
+                                MDRaisedButton:
+                                    text: "Save"
+                                    size_hint_x: 0.5
+                                    on_release: app.save_wordpress_settings()
+
+                        # Facebook Settings Card
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(8)
+                            size_hint_y: None
+                            height: dp(220)
+                            elevation: 2
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                size_hint_y: None
+                                height: dp(30)
+
+                                MDLabel:
+                                    text: "Facebook"
+                                    font_style: "H6"
+                                    size_hint_x: 0.7
+
+                                MDLabel:
+                                    text: app.get_platform_status('facebook')
+                                    font_size: sp(12)
+                                    halign: "right"
+                                    theme_text_color: "Custom"
+                                    text_color: (0, 0.7, 0, 1) if "Configured" in app.get_platform_status('facebook') else (0.7, 0, 0, 1)
+
+                            MDTextField:
+                                hint_text: "Page ID"
+                                text: app.fb_page_id
+                                on_text: app.fb_page_id = self.text
+                                size_hint_y: None
+                                height: dp(48)
+                                mode: "rectangle"
+
+                            MDTextField:
+                                hint_text: "Access Token"
+                                text: app.fb_access_token
+                                on_text: app.fb_access_token = self.text
+                                password: True
+                                size_hint_y: None
+                                height: dp(48)
+                                mode: "rectangle"
+
+                            MDRaisedButton:
+                                text: "Save Facebook Settings"
+                                pos_hint: {'center_x': 0.5}
+                                on_release: app.save_facebook_settings()
+
+                        # Instagram Settings Card
+                        MDCard:
+                            orientation: 'vertical'
+                            padding: dp(16)
+                            spacing: dp(8)
+                            size_hint_y: None
+                            height: dp(220)
+                            elevation: 2
+
+                            BoxLayout:
+                                orientation: 'horizontal'
+                                size_hint_y: None
+                                height: dp(30)
+
+                                MDLabel:
+                                    text: "Instagram"
+                                    font_style: "H6"
+                                    size_hint_x: 0.7
+
+                                MDLabel:
+                                    text: app.get_platform_status('instagram')
+                                    font_size: sp(12)
+                                    halign: "right"
+                                    theme_text_color: "Custom"
+                                    text_color: (0, 0.7, 0, 1) if "Configured" in app.get_platform_status('instagram') else (0.7, 0, 0, 1)
+
+                            MDTextField:
+                                hint_text: "Business Account ID"
+                                text: app.ig_business_id
+                                on_text: app.ig_business_id = self.text
+                                size_hint_y: None
+                                height: dp(48)
+                                mode: "rectangle"
+
+                            MDTextField:
+                                hint_text: "Access Token"
+                                text: app.ig_access_token
+                                on_text: app.ig_access_token = self.text
+                                password: True
+                                size_hint_y: None
+                                height: dp(48)
+                                mode: "rectangle"
+
+                            MDRaisedButton:
+                                text: "Save Instagram Settings"
+                                pos_hint: {'center_x': 0.5}
+                                on_release: app.save_instagram_settings()
+
+                        # Action Buttons
+                        BoxLayout:
+                            orientation: 'vertical'
+                            spacing: dp(12)
+                            size_hint_y: None
+                            height: dp(120)
+                            padding: [0, dp(16), 0, 0]
+
+                            MDRaisedButton:
+                                text: "Save All Settings"
+                                pos_hint: {'center_x': 0.5}
+                                size_hint: (0.8, None)
+                                height: dp(50)
+                                md_bg_color: app.theme_cls.primary_color
+                                on_release: app.save_all_settings()
+
+                            MDRaisedButton:
+                                text: "Clear All Credentials"
+                                pos_hint: {'center_x': 0.5}
+                                size_hint: (0.8, None)
+                                height: dp(40)
+                                md_bg_color: (0.8, 0.2, 0.2, 1)
+                                on_release: app.clear_all_settings()
+

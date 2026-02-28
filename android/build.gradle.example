@@ -1,0 +1,118 @@
+// Example build.gradle configuration for Postboi Android app
+// Add this to your app-level build.gradle file
+
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdk 34
+    
+    defaultConfig {
+        applicationId "com.postboi.app"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+        
+        // Inject environment variables from gradle.properties into BuildConfig
+        // These will be available as BuildConfig.VARIABLE_NAME
+        
+        // WordPress Configuration
+        buildConfigField "String", "WORDPRESS_SITE_URL", 
+            "\"${project.findProperty('WORDPRESS_SITE_URL') ?: ''}\""
+        buildConfigField "String", "WORDPRESS_USERNAME", 
+            "\"${project.findProperty('WORDPRESS_USERNAME') ?: ''}\""
+        buildConfigField "String", "WORDPRESS_APP_PASSWORD", 
+            "\"${project.findProperty('WORDPRESS_APP_PASSWORD') ?: ''}\""
+        
+        // Facebook Configuration
+        buildConfigField "String", "FACEBOOK_APP_ID", 
+            "\"${project.findProperty('FACEBOOK_APP_ID') ?: ''}\""
+        buildConfigField "String", "FACEBOOK_APP_SECRET", 
+            "\"${project.findProperty('FACEBOOK_APP_SECRET') ?: ''}\""
+        buildConfigField "String", "FACEBOOK_ACCESS_TOKEN", 
+            "\"${project.findProperty('FACEBOOK_ACCESS_TOKEN') ?: ''}\""
+        buildConfigField "String", "FACEBOOK_PAGE_ID", 
+            "\"${project.findProperty('FACEBOOK_PAGE_ID') ?: ''}\""
+        
+        // Instagram Configuration
+        buildConfigField "String", "INSTAGRAM_BUSINESS_ACCOUNT_ID", 
+            "\"${project.findProperty('INSTAGRAM_BUSINESS_ACCOUNT_ID') ?: ''}\""
+        buildConfigField "String", "INSTAGRAM_ACCESS_TOKEN", 
+            "\"${project.findProperty('INSTAGRAM_ACCESS_TOKEN') ?: ''}\""
+        
+        // Application Settings
+        buildConfigField "int", "MAX_IMAGE_SIZE_MB", 
+            "${project.findProperty('MAX_IMAGE_SIZE_MB') ?: '10'}"
+        buildConfigField "int", "CONCURRENT_UPLOADS", 
+            "${project.findProperty('CONCURRENT_UPLOADS') ?: '3'}"
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            // Use different credentials for release builds
+            buildConfigField "String", "API_ENDPOINT", "\"https://api.postboi.com\""
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+            
+            // Use test/staging credentials for debug builds
+            buildConfigField "String", "API_ENDPOINT", "\"https://api-staging.postboi.com\""
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    // Core Android
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    
+    // Networking
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    
+    // Image Loading
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    
+    // Facebook SDK
+    implementation 'com.facebook.android:facebook-android-sdk:16.0.0'
+    
+    // Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    
+    // Lifecycle
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+}
+
+// Alternative: Using BuildConfig with local.properties
+// For an even more secure approach, you can use encrypted properties:
+/*
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+android {
+    defaultConfig {
+        buildConfigField "String", "FACEBOOK_PAGE_ID", 
+            "\"${properties.getProperty('FACEBOOK_PAGE_ID', '')}\""
+    }
+}
+*/

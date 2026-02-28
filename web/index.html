@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postboi Web - Starter Template</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2196F3;
+            margin-top: 0;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            background: #f9f9f9;
+        }
+        code {
+            background: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Postboi Web - Starter Template</h1>
+        
+        <div class="note">
+            <strong>⚠️ SECURITY WARNING:</strong> The code examples below are for DEMONSTRATION PURPOSES ONLY. Never expose sensitive API keys, secrets, or access tokens in client-side JavaScript. All API calls with credentials must be handled by a secure backend server. Client-side code can be inspected by anyone visiting your website.
+        </div>
+
+        <div class="section">
+            <h2>Getting Started</h2>
+            <p>This is a starter template for the Postboi web application. Follow the steps below to set up your environment.</p>
+        </div>
+
+        <div class="section">
+            <h2>1. Environment Setup</h2>
+            <p>Create a <code>.env</code> file in the root directory with your API credentials:</p>
+            <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">
+# WordPress Configuration
+WORDPRESS_SITE_URL=https://yoursite.wordpress.com
+WORDPRESS_USERNAME=your_username
+WORDPRESS_APP_PASSWORD=your_app_password
+
+# Facebook Configuration
+FACEBOOK_APP_ID=your_app_id
+FACEBOOK_APP_SECRET=your_app_secret
+FACEBOOK_ACCESS_TOKEN=your_access_token
+FACEBOOK_PAGE_ID=your_page_id
+
+# Instagram Configuration
+INSTAGRAM_BUSINESS_ACCOUNT_ID=your_business_account_id
+INSTAGRAM_ACCESS_TOKEN=your_access_token
+
+# Application Settings
+MAX_IMAGE_SIZE_MB=10
+CONCURRENT_UPLOADS=3</pre>
+        </div>
+
+        <div class="section">
+            <h2>2. Initialize Application</h2>
+            <p>Add the following JavaScript to your <strong>backend server</strong> (Node.js example):</p>
+            <pre style="background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto;">
+// SERVER-SIDE CODE (Node.js with Express)
+// Load environment variables (requires dotenv for Node.js backend)
+require('dotenv').config();
+
+const config = {
+    wordpress: {
+        siteUrl: process.env.WORDPRESS_SITE_URL,
+        username: process.env.WORDPRESS_USERNAME,
+        appPassword: process.env.WORDPRESS_APP_PASSWORD
+    },
+    facebook: {
+        appId: process.env.FACEBOOK_APP_ID,
+        appSecret: process.env.FACEBOOK_APP_SECRET,
+        accessToken: process.env.FACEBOOK_ACCESS_TOKEN,
+        pageId: process.env.FACEBOOK_PAGE_ID
+    },
+    instagram: {
+        businessAccountId: process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID,
+        accessToken: process.env.INSTAGRAM_ACCESS_TOKEN
+    },
+    app: {
+        maxImageSizeMb: parseInt(process.env.MAX_IMAGE_SIZE_MB || '10'),
+        concurrentUploads: parseInt(process.env.CONCURRENT_UPLOADS || '3')
+    }
+};
+
+// Initialize API clients on server
+async function initializeApp() {
+    console.log('Initializing Postboi Web App on server...');
+    
+    // Validate configuration
+    if (!config.facebook.pageId || config.facebook.pageId === 'your_page_id') {
+        console.warn('Facebook credentials not configured');
+    }
+    
+    if (!config.instagram.businessAccountId || config.instagram.businessAccountId === 'your_business_account_id') {
+        console.warn('Instagram credentials not configured');
+    }
+    
+    if (!config.wordpress.siteUrl || config.wordpress.siteUrl === 'https://yoursite.wordpress.com') {
+        console.warn('WordPress credentials not configured');
+    }
+    
+    console.log('Server initialized successfully');
+}
+
+// CLIENT-SIDE CODE (minimal, no secrets)
+// In your HTML/JavaScript, only send requests to your backend
+async function postToSocialMedia(imageData, caption, platforms) {
+    // Send to YOUR backend API, not directly to social media APIs
+    const response = await fetch('/api/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData, caption, platforms })
+    });
+    return response.json();
+}</pre>
+        </div>
+
+        <div class="note">
+            <strong>🔒 Important:</strong> The client-side JavaScript should NEVER contain API secrets, tokens, or passwords. Always proxy API requests through your backend server where credentials are stored securely in environment variables.
+        </div>
+
+        <div class="section">
+            <h2>3. Next Steps</h2>
+            <ul>
+                <li>Set up a Node.js backend to handle API calls securely</li>
+                <li>Implement authentication and authorization</li>
+                <li>Create UI components for image selection and posting</li>
+                <li>Add error handling and loading states</li>
+                <li>Implement rate limiting and request throttling</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📚 Resources</h2>
+            <ul>
+                <li><a href="../README.md">Main README</a></li>
+                <li><a href="https://developers.facebook.com/docs/graph-api">Facebook Graph API</a></li>
+                <li><a href="https://developers.facebook.com/docs/instagram-api">Instagram Graph API</a></li>
+                <li><a href="https://developer.wordpress.org/rest-api/">WordPress REST API</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Example initialization code (for demonstration)
+        console.log('Postboi Web Starter Template Loaded');
+        console.log('Please configure your .env file with API credentials');
+    </script>
+</body>
+</html>
