@@ -20,7 +20,8 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.card import MDCard
-from plyer import filechooser, clipboard
+from plyer import filechooser
+from kivy.core.clipboard import Clipboard as clipboard
 import threading
 
 # Import services
@@ -78,7 +79,14 @@ class PostboiApp(MDApp):
     
     # Monetization properties
     is_premium = BooleanProperty(False)
+    
+    # File chooser state
+    last_image_folder = StringProperty('')
+    file_sort_key = StringProperty('name')  # 'name', 'date', 'size'
 
+    # Prevent auto-loading of KV file (we load it manually in build())
+    kv_file = ''
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.title = "Postboi"
@@ -224,7 +232,10 @@ class PostboiApp(MDApp):
 
     def build(self):
         """Build the application UI."""
-        return
+        from kivy.lang import Builder
+        # Load and return the root ScreenManager
+        self.screen_manager = Builder.load_file('postboi.kv')
+        return self.screen_manager
     
     def on_start(self):
         """Called when the app starts."""
@@ -610,14 +621,184 @@ class PostboiApp(MDApp):
 
     def on_select_image(self):
         """Handle image selection from device."""
-        try:
-            # Use plyer filechooser for cross-platform compatibility
-            filechooser.open_file(
-                on_selection=self._on_file_selected,
-                filters=["*.jpg", "*.jpeg", "*.png", "*.webp"]
-            )
-        except Exception as e:
-            self.show_error_dialog(f"Error opening file chooser: {str(e)}")
+        from kivy.uix.filechooser import FileChooserListView
+        from kivy.uix.popup import Popup
+        from kivy.uix.boxlayout import BoxLayout
+        from kivy.uix.button import Button
+        from kivy.uix.label import Label
+        from kivy.uix.togglebutton import ToggleButton
+        from kivy.metrics import dp
+        import os
+        import time
+        
+        # Determine start path - use last folder if available
+        if self.last_image_folder and os.path.exists(self.last_image_folder):
+            start_path = self.last_image_folder
+        else:
+            start_path = os.path.expanduser('~/Pictures')
+            if not os.path.exists(start_path):
+                start_path = os.path.expanduser('~/Desktop')
+            if not os.path.exists(start_path):
+                start_path = os.path.expanduser('~')
+        
+        # Custom file entry template with date/size info
+        def get_file_info(path):
+            """Get formatted file info string."""
+            try:
+                stat = os.stat(path)
+                size_kb = stat.st_size / 1024
+                if size_kb > 1024:
+                    size_str = f"{size_kb/1024:.1f} MB"
+                else:
+                    size_str = f"{size_kb:.0f} KB"
+                mod_time = time.strftime('%Y-%m-%d %H:%M', time.localtime(stat.st_mtime))
+                return f"{size_str} | {mod_time}"
+            except:
+                return ""
+        
+        # Sort function based on current sort key
+        def sort_files(files, folder):
+            """Sort files based on selected sort key."""
+            def get_sort_value(f):
+                path = os.path.join(folder, f)
+                try:
+                    stat = os.stat(path)
+                    if self.file_sort_key == 'date':
+                        return -stat.st_mtime  # Negative for newest first
+                    elif self.file_sort_key == 'size':
+                        return -stat.st_size  # Negative for largest first
+                    else:  # name
+                        return f.lower()
+                except:
+                    return f.lower()
+            
+            # Separate folders and files
+            folders = [f for f in files if os.path.isdir(os.path.join(folder, f))]
+            regular_files = [f for f in files if not os.path.isdir(os.path.join(folder, f))]
+            
+            # Sort each list
+            folders.sort(key=lambda x: x.lower())  # Folders always by name
+            regular_files.sort(key=get_sort_value)
+            
+            return folders + regular_files
+        
+        # Create main layout
+        content = BoxLayout(orientation='vertical', spacing=dp(5), padding=dp(5))
+        
+        # Sort buttons row
+        sort_layout = BoxLayout(size_hint_y=None, height=dp(40), spacing=dp(5))
+        sort_label = Label(text='Sort by:', size_hint_x=0.2)
+        
+        sort_name_btn = ToggleButton(
+            text='Name', 
+            group='sort', 
+            state='down' if self.file_sort_key == 'name' else 'normal',
+            size_hint_x=0.27
+        )
+        sort_date_btn = ToggleButton(
+            text='Date', 
+            group='sort', 
+            state='down' if self.file_sort_key == 'date' else 'normal',
+            size_hint_x=0.27
+        )
+        sort_size_btn = ToggleButton(
+            text='Size', 
+            group='sort', 
+            state='down' if self.file_sort_key == 'size' else 'normal',
+            size_hint_x=0.26
+        )
+        
+        # File chooser with custom sort
+        file_chooser = FileChooserListView(
+            path=start_path,
+            filters=['*.jpg', '*.jpeg', '*.png', '*.webp', '*.JPG', '*.JPEG', '*.PNG', '*.gif', '*.GIF'],
+            size_hint_y=0.85
+        )
+        
+        # Override the sort function
+        original_sort = file_chooser.sort_func
+        def custom_sort(files, filesystem):
+            return sort_files(files, file_chooser.path)
+        file_chooser.sort_func = custom_sort
+        
+        # File info label
+        info_label = Label(
+            text='Select an image file',
+            size_hint_y=None,
+            height=dp(30),
+            halign='left'
+        )
+        info_label.bind(size=lambda *x: setattr(info_label, 'text_size', info_label.size))
+        
+        def update_info(instance, selection):
+            if selection:
+                path = selection[0]
+                if os.path.isfile(path):
+                    info_label.text = f"Selected: {os.path.basename(path)} ({get_file_info(path)})"
+                else:
+                    info_label.text = "Select an image file"
+            else:
+                info_label.text = "Select an image file"
+        
+        file_chooser.bind(selection=update_info)
+        
+        # Sort button handlers
+        def on_sort_change(btn):
+            if btn.state == 'down':
+                if btn.text == 'Name':
+                    self.file_sort_key = 'name'
+                elif btn.text == 'Date':
+                    self.file_sort_key = 'date'
+                elif btn.text == 'Size':
+                    self.file_sort_key = 'size'
+                # Refresh file list
+                current_path = file_chooser.path
+                file_chooser.path = ''
+                file_chooser.path = current_path
+        
+        sort_name_btn.bind(on_release=on_sort_change)
+        sort_date_btn.bind(on_release=on_sort_change)
+        sort_size_btn.bind(on_release=on_sort_change)
+        
+        sort_layout.add_widget(sort_label)
+        sort_layout.add_widget(sort_name_btn)
+        sort_layout.add_widget(sort_date_btn)
+        sort_layout.add_widget(sort_size_btn)
+        
+        # Action buttons
+        btn_layout = BoxLayout(size_hint_y=None, height=dp(50), spacing=dp(10))
+        
+        def select_file(instance):
+            if file_chooser.selection:
+                # Remember the folder
+                selected_path = file_chooser.selection[0]
+                self.last_image_folder = os.path.dirname(selected_path)
+                self._on_file_selected(file_chooser.selection)
+            popup.dismiss()
+        
+        def cancel(instance):
+            # Still remember the folder even on cancel
+            self.last_image_folder = file_chooser.path
+            popup.dismiss()
+        
+        select_btn = Button(text='Select', on_release=select_file)
+        cancel_btn = Button(text='Cancel', on_release=cancel)
+        
+        btn_layout.add_widget(cancel_btn)
+        btn_layout.add_widget(select_btn)
+        
+        # Assemble layout
+        content.add_widget(sort_layout)
+        content.add_widget(file_chooser)
+        content.add_widget(info_label)
+        content.add_widget(btn_layout)
+        
+        popup = Popup(
+            title='Select Image',
+            content=content,
+            size_hint=(0.95, 0.95)
+        )
+        popup.open()
 
     def _on_file_selected(self, selection):
         """Callback when file is selected."""
@@ -644,24 +825,25 @@ class PostboiApp(MDApp):
             self.show_error_dialog("Please select an image first")
             return
 
-        if not self.caption_text:
-            self.show_error_dialog("Please enter a caption")
-            return
+        # Caption is optional - platforms accept images without captions
+        # if not self.caption_text:
+        #     self.show_error_dialog("Please enter a caption")
+        #     return
 
         if not self.selected_platforms:
             self.show_error_dialog("Please select at least one platform")
             return
 
-        # Apply filter if selected
+        # Apply filter if selected (optional feature - currently disabled)
         image_to_share = self.selected_image
-        if self.selected_filter != 'none':
-            self.is_loading = True
-            filtered_path = self.image_filters.apply_filter(
-                self.selected_image,
-                self.selected_filter
-            )
-            if filtered_path:
-                image_to_share = filtered_path
+        # if self.selected_filter != 'none':
+        #     self.is_loading = True
+        #     filtered_path = self.image_filters.apply_filter(
+        #         self.selected_image,
+        #         self.selected_filter
+        #     )
+        #     if filtered_path:
+        #         image_to_share = filtered_path
 
         # Start sharing in background thread
         self.is_loading = True
