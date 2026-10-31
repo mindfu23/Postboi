@@ -1,3 +1,6 @@
+# Personal TODO (not for repo)
+TODO.md
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -192,3 +195,10 @@ build/
 # Keystore files (DO NOT COMMIT!)
 *.keystore
 *.jks
+
+# Store submission checklist (local only)
+STORE_CHECKLIST.md
+
+# Claude Code
+.claude/
+CLAUDE.md
